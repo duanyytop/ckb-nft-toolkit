@@ -1,0 +1,34 @@
+{
+  "name": "ckb-cheque-script-test",
+  "version": "1.0.0",
+  "description": "The test for ckb-cheque-script",
+  "main": "index.js",
+  "repository": "git@github.com:duanyytop/ckb-cheque-script-test.git",
+  "author": "duanyytop <duanyytop@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "node example/index.js",
+    "lint": "eslint src/**/*.js --fix"
+  },
+  "dependencies": {
+    "@nervosnetwork/ckb-sdk-core": "^0.41.0",
+    "@nervosnetwork/ckb-sdk-utils": "^0.41.0",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "dotenv": "^8.2.0",
+    "eslint": "^7.27.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.3",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-prettier": "^3.4.0",
+    "husky": "^4.3.0",
+    "prettier": "^2.3.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn lint"
+    }
+  }
+}
