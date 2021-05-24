@@ -35,9 +35,9 @@ const u64ToLe = u64 => {
   if (typeof u64 !== 'bigint') {
     throw new Error('u64 must be bigint')
   }
-  const val = u64.toString(16)
-  const viewRight = u32ToLe(`0x${val.slice(0, 8)}`).slice(2)
-  const viewLeft = u32ToLe(`0x${val.slice(8)}`).slice(2)
+  const val = u64.toString(16).padStart(16, '0')
+  const viewRight = u32ToLe(`0x${val.slice(0, 8)}`)
+  const viewLeft = u32ToLe(`0x${val.slice(8)}`)
   return `${viewLeft}${viewRight}`
 }
 

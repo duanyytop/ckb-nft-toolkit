@@ -13,7 +13,8 @@ class Issuer {
   }
 
   toString() {
-    return `0x${u8ToHex(this.#version)}${u32ToBe(this.#classCount)}${u32ToBe(this.#setCount)}${remove0x(this.#info)}`
+    const infoData = `${u32ToBe(remove0x(this.#info).length)}${remove0x(this.#info)}`
+    return `0x${u8ToHex(this.#version)}${u32ToBe(this.#classCount)}${u32ToBe(this.#setCount)}${infoData}`
   }
 }
 

@@ -8,7 +8,7 @@ const { u64ToLe } = require('../utils/hex')
 const { Issuer } = require('../model/issuer')
 
 const ckb = new CKB(CKB_NODE_RPC)
-const ISSUER_CELL_CAPACITY = BigInt(200) * BigInt(100000000)
+const ISSUER_CELL_CAPACITY = BigInt(150) * BigInt(100000000)
 const PERSONAL = new Uint8Array([99, 107, 98, 45, 100, 101, 102, 97, 117, 108, 116, 45, 104, 97, 115, 104])
 
 const generateIssuerTypeArgs = (firstInput, firstOutputIndex) => {
@@ -53,7 +53,6 @@ const createIssuerCell = async () => {
     outputsData: [issuer.toString(), '0x'],
   }
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
-  console.log(JSON.stringify(rawTx))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
   const txHash = await ckb.rpc.sendTransaction(signedTx)
   console.info(`Creating issuer cell tx has been sent with tx hash ${txHash}`)
