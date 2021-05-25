@@ -1,4 +1,4 @@
-const { u8ToHex, u32ToBe, encode } = require('../utils/hex')
+const { u8ToHex, u32ToBe, encode, remove0x } = require('../utils/hex')
 
 /**
  * Class {
@@ -42,6 +42,18 @@ class TokenClass {
     )}${dynamic}`
   }
 
+  get issued() {
+    return this.#issued
+  }
+
+  updateIssued(issued) {
+    this.#issued = issued
+  }
+
+  get total() {
+    return this.#total
+  }
+
   static fromString(data) {
     const temp = remove0x(data)
     if (temp.length < 24) {
@@ -52,21 +64,21 @@ class TokenClass {
     const issued = parseInt(temp.slice(10, 18), 16)
     const configure = parseInt(temp.slice(18, 20), 16)
 
-    const nameLen = parseInt(temp.slice(20, 24), 16)
+    const nameLen = parseInt(temp.slice(20, 24), 16) * 2
     const name = temp.slice(24, nameLen + 24)
 
     if (temp.length < 28 + nameLen) {
       throw new Error('Class data invalid')
     }
 
-    const descriptionLen = parseInt(temp.slice(nameLen + 24, nameLen + 28), 16)
+    const descriptionLen = parseInt(temp.slice(nameLen + 24, nameLen + 28), 16) * 2
     const description = temp.slice(nameLen + 28, descriptionLen + nameLen + 28)
 
     if (temp.length < descriptionLen + nameLen + 32) {
       throw new Error('Class data invalid')
     }
 
-    const rendererLen = parseInt(temp.slice(descriptionLen + nameLen + 28, descriptionLen + nameLen + 32), 16)
+    const rendererLen = parseInt(temp.slice(descriptionLen + nameLen + 28, descriptionLen + nameLen + 32), 16) * 2
     const renderer = temp.slice(descriptionLen + nameLen + 32, descriptionLen + nameLen + rendererLen + 32)
 
     return new TokenClass(version, total, issued, configure, name, description, renderer)
