@@ -1,8 +1,22 @@
 const fetch = require('node-fetch')
-const { CKB_NODE_INDEXER } = require('../utils/config')
+const CKB = require('@nervosnetwork/ckb-sdk-core').default
+const { CKB_NODE_RPC, CKB_NODE_INDEXER } = require('../utils/config')
 const { FEE } = require('../utils/const')
 
-const getCells = async lock => {
+const ckb = new CKB(CKB_NODE_RPC)
+
+const getCells = async (lock, type = null) => {
+  const filter = type
+    ? {
+        script: {
+          code_hash: type.codeHash,
+          hash_type: type.hashType,
+          args: type.args,
+        },
+      }
+    : {
+        output_data_len_range: ['0x0', '0x1'],
+      }
   let payload = {
     id: 1,
     jsonrpc: '2.0',
@@ -15,6 +29,7 @@ const getCells = async lock => {
           args: lock.args,
         },
         script_type: 'lock',
+        filter,
       },
       'asc',
       '0x64',
@@ -58,7 +73,13 @@ const collectInputs = (liveCells, needCapacity) => {
   return { inputs, capacity: sum }
 }
 
+const getLiveCell = async outPoint => {
+  const { cell } = await ckb.rpc.getLiveCell(outPoint, true)
+  return cell
+}
+
 module.exports = {
   getCells,
   collectInputs,
+  getLiveCell,
 }

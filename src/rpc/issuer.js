@@ -5,7 +5,7 @@ const { getCells, collectInputs } = require('../collector')
 const { FEE, IssuerTypeScript, IssuerTypeDep } = require('../utils/const')
 const { CKB_NODE_RPC, PRIVATE_KEY } = require('../utils/config')
 const { u64ToLe } = require('../utils/hex')
-const { Issuer } = require('../model/issuer')
+const { Issuer } = require('../models/issuer')
 
 const ckb = new CKB(CKB_NODE_RPC)
 const ISSUER_CELL_CAPACITY = BigInt(150) * BigInt(100000000)
@@ -43,7 +43,7 @@ const createIssuerCell = async () => {
   const issuerTypeArgs = generateIssuerTypeArgs(inputs[0], BigInt(0))
   const outputs = await generateIssuerOutputs(capacity, { ...IssuerTypeScript, args: issuerTypeArgs })
   const cellDeps = [await secp256k1Dep(), IssuerTypeDep]
-  const issuer = new Issuer(0, 0, '')
+  const issuer = new Issuer(0, 0, 0, '')
   const rawTx = {
     version: '0x0',
     cellDeps,
@@ -54,6 +54,7 @@ const createIssuerCell = async () => {
   }
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
+  console.info(JSON.stringify(signedTx))
   const txHash = await ckb.rpc.sendTransaction(signedTx)
   console.info(`Creating issuer cell tx has been sent with tx hash ${txHash}`)
   return txHash

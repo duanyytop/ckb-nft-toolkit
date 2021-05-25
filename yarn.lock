@@ -159,7 +159,7 @@
     "@nervosnetwork/ckb-types" "0.41.1"
     tslib "2.0.1"
 
-"@nervosnetwork/ckb-sdk-rpc@0.41.1":
+"@nervosnetwork/ckb-sdk-rpc@0.41.1", "@nervosnetwork/ckb-sdk-rpc@^0.41.1":
   version "0.41.1"
   resolved "https://registry.yarnpkg.com/@nervosnetwork/ckb-sdk-rpc/-/ckb-sdk-rpc-0.41.1.tgz#b4981dae7b188ed4dfbf0cf98bf2e00c23ed0813"
   integrity sha512-79QAWeepzwmE1oDF/+87WlubK+gsH4sTGsq+i7W+QxQAZsoGMIzNPFXrlQdt3C/PNz6F+xga9LHWZgNCQeGFAA==

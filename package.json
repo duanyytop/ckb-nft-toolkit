@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@nervosnetwork/ckb-sdk-core": "^0.41.0",
+    "@nervosnetwork/ckb-sdk-rpc": "^0.41.1",
     "@nervosnetwork/ckb-sdk-utils": "^0.41.0",
     "node-fetch": "^2.6.1"
   },

@@ -22,7 +22,8 @@ class TokenClass {
   #renderer = ''
   #extinfoData = ''
 
-  constructor(total, issued, configure, name, description, renderer, extinfoData = '') {
+  constructor(version, total, issued, configure, name, description, renderer, extinfoData = '') {
+    this.#version = version
     this.#total = total
     this.#issued = issued
     this.#configure = configure
@@ -68,7 +69,7 @@ class TokenClass {
     const rendererLen = parseInt(temp.slice(descriptionLen + nameLen + 28, descriptionLen + nameLen + 32), 16)
     const renderer = temp.slice(descriptionLen + nameLen + 32, descriptionLen + nameLen + rendererLen + 32)
 
-    return new TokenClass(total, issued, configure, name, description, renderer)
+    return new TokenClass(version, total, issued, configure, name, description, renderer)
   }
 }
 
