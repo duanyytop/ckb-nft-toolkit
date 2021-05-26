@@ -1,5 +1,5 @@
 const CKB = require('@nervosnetwork/ckb-sdk-core').default
-const { secp256k1LockScript, secp256k1Dep } = require('../account')
+const { secp256k1LockScript, secp256k1Dep, receiverSecp256k1Lock } = require('../account')
 const { getCells, collectInputs, getLiveCell } = require('../collector')
 const { FEE, NFTTypeScript, ClassTypeScript, ClassTypeDep, NFTTypeDep } = require('../utils/const')
 const { CKB_NODE_RPC, PRIVATE_KEY } = require('../utils/config')
@@ -77,6 +77,41 @@ const createNftCells = async (classTypeArgs, nftCount = 1) => {
   return txHash
 }
 
+const transferNftCells = async nftOutPoints => {
+  const inputs = nftOutPoints.map(outPoint => ({
+    previousOutput: outPoint,
+    since: '0x0',
+  }))
+
+  let outputs = []
+  let outputsData = []
+  const receiverLock = await receiverSecp256k1Lock()
+  for await (let outPoint of nftOutPoints) {
+    const nftCell = await getLiveCell(outPoint)
+    outputs.push({ ...nftCell.output, lock: receiverLock })
+    outputsData.push(nftCell.data.content)
+  }
+  outputs[0].capacity = `0x${(BigInt(outputs[0].capacity) - FEE).toString(16)}`
+
+  const cellDeps = [await secp256k1Dep(), NFTTypeDep]
+
+  const rawTx = {
+    version: '0x0',
+    cellDeps,
+    headerDeps: [],
+    inputs,
+    outputs,
+    outputsData,
+  }
+  rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
+  const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
+  console.log(JSON.stringify(signedTx))
+  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  console.info(`Transfer nft cells tx has been sent with tx hash ${txHash}`)
+  return txHash
+}
+
 module.exports = {
   createNftCells,
+  transferNftCells,
 }

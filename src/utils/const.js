@@ -12,24 +12,24 @@ const IssuerTypeDep = {
 }
 
 const ClassTypeScript = {
-  codeHash: '0x095b8c0b4e51a45f953acd1fcd1e39489f2675b4bc94e7af27bb38958790e3fc',
+  codeHash: '0xd7ba1fbc20f5611e11a9e883bbc9abede84f614aae411b7157284d7ff4f22b0d',
   hashType: 'type',
   args: '',
 }
 
 const ClassTypeDep = {
-  outPoint: { txHash: '0x4f27e40b302bcb3bf0af3deae460f46076de2b4db30c0212b14b341c20fcb330', index: '0x0' },
+  outPoint: { txHash: '0x3b9f7c048ecbd15c90638e816b9980113127b6ac9eb2b75e822dfb3ada8ede78', index: '0x0' },
   depType: 'code',
 }
 
 const NFTTypeScript = {
-  codeHash: '0xb1837b5ad01a88558731953062d1f5cb547adf89ece01e8934a9f0aeed2d959f',
+  codeHash: '0xab3df8e57d9b2afd107195d67ad98a3412b542f2be5c7456863600749f85e8e5',
   hashType: 'type',
   args: '',
 }
 
 const NFTTypeDep = {
-  outPoint: { txHash: '0x7f9e3c1a2fc90411eb90fc2363101f6bd7b33875c3535117db5e52cd8a78b313', index: '0x0' },
+  outPoint: { txHash: '0x18c0415a211e11a2611c7dcdde7ee13b643e468760115eeb35f6ee44501c66e8', index: '0x0' },
   depType: 'code',
 }
 
