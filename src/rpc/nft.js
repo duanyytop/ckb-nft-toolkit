@@ -111,7 +111,40 @@ const transferNftCells = async nftOutPoints => {
   return txHash
 }
 
+const destroyNftCell = async nftOutPoint => {
+  const inputs = [
+    {
+      previousOutput: nftOutPoint,
+      since: '0x0',
+    },
+  ]
+  const nftCell = await getLiveCell(nftOutPoint)
+  const output = nftCell.output
+  output.capacity = `0x${(BigInt(output.capacity) - FEE).toString(16)}`
+  output.type = null
+  const outputs = [output]
+  const outputsData = ['0x']
+
+  const cellDeps = [await secp256k1Dep(), NFTTypeDep]
+
+  const rawTx = {
+    version: '0x0',
+    cellDeps,
+    headerDeps: [],
+    inputs,
+    outputs,
+    outputsData,
+  }
+  rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
+  const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
+  console.log(JSON.stringify(signedTx))
+  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  console.info(`Destroy nft cell tx has been sent with tx hash ${txHash}`)
+  return txHash
+}
+
 module.exports = {
   createNftCells,
   transferNftCells,
+  destroyNftCell,
 }

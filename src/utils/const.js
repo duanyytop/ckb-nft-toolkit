@@ -1,4 +1,4 @@
-const FEE = BigInt(2000)
+const FEE = BigInt(1000)
 
 const IssuerTypeScript = {
   codeHash: '0xb59879b6ea6fff985223117fa499ce84f8cfb028c4ffdfdf5d3ec19e905a11ed',
