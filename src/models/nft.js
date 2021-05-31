@@ -16,6 +16,7 @@ class Nft {
   #configure = 0
   #state = 0
   #extinfoData = ''
+  #extension = ''
 
   constructor(version, characteristic, configure, state, extinfoData = '') {
     this.#version = version
@@ -28,7 +29,7 @@ class Nft {
   toString() {
     const chars = this.#characteristic.map(char => u8ToHex(char)).join('')
     const result = `0x${u8ToHex(this.#version)}${chars}${u8ToHex(this.#configure)}${u8ToHex(this.#state)}`
-    return this.#extinfoData ? `${result}${encode(this.#extinfoData)}` : result
+    return this.#extinfoData ? `${result}${encode(this.#extinfoData)}${this.#extension}` : `${result}${this.#extension}`
   }
 
   get characteristic() {
@@ -41,6 +42,34 @@ class Nft {
 
   get state() {
     return this.#state
+  }
+
+  lock() {
+    if ((this.#configure & 0b0000_0010) === 0b0000_0000) {
+      this.#state = this.#state | 0b0000_0010
+    } else {
+      throw new Error('The NFT cell cannot be locked.')
+    }
+  }
+
+  allowClaim() {
+    return (this.#configure & 0b0000_0001) === 0b0000_0000
+  }
+
+  claim() {
+    if ((this.#configure & 0b0000_0001) === 0b0000_0000) {
+      this.#state = this.#state | 0b0000_0001
+    } else {
+      throw new Error('The NFT cell cannot be claimed.')
+    }
+  }
+
+  addExtInfo(extInfo) {
+    if ((this.#configure & 0b0000_0100) === 0b0000_0000) {
+      this.#extension = this.#extension + encode(extInfo)
+    } else {
+      throw new Error('The NFT cell cannot be added extension info data.')
+    }
   }
 
   static fromString(data) {
