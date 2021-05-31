@@ -1,5 +1,5 @@
 const { hexToBytes } = require('@nervosnetwork/ckb-sdk-utils')
-const { u8ToHex, encode, remove0x } = require('../utils/hex')
+const { u8ToHex, encode, remove0x, decode } = require('../utils/hex')
 
 /**
  * Nft {
@@ -28,8 +28,10 @@ class Nft {
 
   toString() {
     const chars = this.#characteristic.map(char => u8ToHex(char)).join('')
-    const result = `0x${u8ToHex(this.#version)}${chars}${u8ToHex(this.#configure)}${u8ToHex(this.#state)}`
-    return this.#extinfoData ? `${result}${encode(this.#extinfoData)}${this.#extension}` : `${result}${this.#extension}`
+    let result = `0x${u8ToHex(this.#version)}${chars}${u8ToHex(this.#configure)}${u8ToHex(this.#state)}`
+    result = this.#extinfoData ? `${result}${encode(this.#extinfoData)}` : result
+    result = this.#extension ? `${result}${encode(this.#extension)}` : result
+    return result
   }
 
   get characteristic() {
@@ -78,10 +80,11 @@ class Nft {
       throw new Error('Nft data invalid')
     }
     const version = parseInt(temp.slice(0, 2), 16)
-    const characteristic = Array.from(hexToBytes(temp.slice(2, 18)))
+    const characteristic = Array.from(hexToBytes(`0x${temp.slice(2, 18)}`))
     const configure = parseInt(temp.slice(18, 20), 16)
     const state = parseInt(temp.slice(20, 22), 16)
-    const extinfoData = temp.slice(22)
+    const extinfoData = decode(temp.slice(22))
+    console.log(extinfoData)
     return new Nft(version, characteristic, configure, state, extinfoData)
   }
 }

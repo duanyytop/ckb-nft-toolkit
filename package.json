@@ -7,7 +7,9 @@
   "author": "duanyytop <duanyytop@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "node example/index.js",
+    "start:issuer": "node example/issuer.js",
+    "start:class": "node example/class.js",
+    "start:nft": "node example/nft.js",
     "lint": "eslint src/**/*.js --fix"
   },
   "dependencies": {

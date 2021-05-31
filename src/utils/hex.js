@@ -58,6 +58,9 @@ const encode = hex => {
 }
 
 const decode = hex => {
+  if (hex === '' || hex === '0000') {
+    return ''
+  }
   const size = parseInt(hex.slice(0, 4)) * 2
   if (size !== hex.length - 4) {
     throw new Error('Dynamic data format invalid')

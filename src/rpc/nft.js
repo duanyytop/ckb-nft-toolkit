@@ -8,7 +8,7 @@ const { TokenClass } = require('../models/class')
 const { Nft } = require('../models/nft')
 
 const ckb = new CKB(CKB_NODE_RPC)
-const NFT_CELL_CAPACITY = BigInt(134) * BigInt(100000000)
+const NFT_CELL_CAPACITY = BigInt(135) * BigInt(100000000)
 
 const generateNftOutputs = async (inputCapacity, classTypeScripts) => {
   const lock = await secp256k1LockScript()
@@ -46,7 +46,8 @@ const createNftCells = async (classTypeArgs, nftCount = 1) => {
   const classOutput = classCell.output
   let nftTypeScripts = []
   let nfts = []
-  const nft = new Nft(0, [0, 0, 0, 0, 0, 0, 0, 0, 0], 0, 0, '').toString()
+  const nft = new Nft(0, [0, 0, 0, 0, 0, 0, 0, 0], 2, 0, '').toString()
+  console.log(nft)
   for (let i = 0; i < nftCount; i++) {
     nftTypeScripts.push({
       ...NFTTypeScript,
@@ -143,8 +144,43 @@ const destroyNftCell = async nftOutPoint => {
   return txHash
 }
 
+const lockNftCell = async nftOutPoint => {
+  const inputs = [
+    {
+      previousOutput: nftOutPoint,
+      since: '0x0',
+    },
+  ]
+
+  const nftCell = await getLiveCell(nftOutPoint)
+  const outputs = [nftCell.output]
+  outputs[0].capacity = `0x${(BigInt(outputs[0].capacity) - FEE).toString(16)}`
+
+  let nft = Nft.fromString(nftCell.data.content)
+  nft.lock()
+  let outputsData = [nft.toString()]
+
+  const cellDeps = [await secp256k1Dep(), NFTTypeDep]
+
+  const rawTx = {
+    version: '0x0',
+    cellDeps,
+    headerDeps: [],
+    inputs,
+    outputs,
+    outputsData,
+  }
+  rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
+  const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
+  console.log(JSON.stringify(signedTx))
+  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  console.info(`Lock nft cell tx has been sent with tx hash ${txHash}`)
+  return txHash
+}
+
 module.exports = {
   createNftCells,
   transferNftCells,
   destroyNftCell,
+  lockNftCell,
 }
