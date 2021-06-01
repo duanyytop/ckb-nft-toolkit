@@ -1,7 +1,8 @@
 const CKB = require('@nervosnetwork/ckb-sdk-core').default
 const { secp256k1LockScript, secp256k1Dep, receiverSecp256k1Lock } = require('../account')
 const { getCells, collectInputs, getLiveCell } = require('../collector')
-const { FEE, NFTTypeScript, ClassTypeScript, ClassTypeDep, NFTTypeDep } = require('../utils/const')
+const { FEE, NFTTypeScript, ClassTypeScript, ClassTypeDep, NFTTypeDep } = require('../constants/script')
+const { UpdateActions } = require('../constants/types')
 const { CKB_NODE_RPC, PRIVATE_KEY } = require('../utils/config')
 const { u32ToBe } = require('../utils/hex')
 const { TokenClass } = require('../models/class')
@@ -46,8 +47,7 @@ const createNftCells = async (classTypeArgs, nftCount = 1) => {
   const classOutput = classCell.output
   let nftTypeScripts = []
   let nfts = []
-  const nft = new Nft(0, [0, 0, 0, 0, 0, 0, 0, 0], 2, 0, '').toString()
-  console.log(nft)
+  const nft = new Nft(0, [0, 0, 0, 0, 0, 0, 0, 0], 1, 0, '').toString()
   for (let i = 0; i < nftCount; i++) {
     nftTypeScripts.push({
       ...NFTTypeScript,
@@ -144,7 +144,10 @@ const destroyNftCell = async nftOutPoint => {
   return txHash
 }
 
-const lockNftCell = async nftOutPoint => {
+const updateNftCell = async (nftOutPoint, action) => {
+  if (!action) {
+    throw new Error('Action is not defined ')
+  }
   const inputs = [
     {
       previousOutput: nftOutPoint,
@@ -157,7 +160,16 @@ const lockNftCell = async nftOutPoint => {
   outputs[0].capacity = `0x${(BigInt(outputs[0].capacity) - FEE).toString(16)}`
 
   let nft = Nft.fromString(nftCell.data.content)
-  nft.lock()
+  switch (action) {
+    case UpdateActions.LOCK:
+      nft.lock()
+      break
+    case UpdateActions.CLAIM:
+      nft.claim()
+      break
+    default:
+      break
+  }
   let outputsData = [nft.toString()]
 
   const cellDeps = [await secp256k1Dep(), NFTTypeDep]
@@ -174,13 +186,18 @@ const lockNftCell = async nftOutPoint => {
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
   console.log(JSON.stringify(signedTx))
   const txHash = await ckb.rpc.sendTransaction(signedTx)
-  console.info(`Lock nft cell tx has been sent with tx hash ${txHash}`)
+  console.info(`${action.toString()} nft cell tx has been sent with tx hash ${txHash}`)
   return txHash
 }
+
+const lockNftCell = async nftOutPoint => await updateNftCell(nftOutPoint, UpdateActions.LOCK)
+
+const claimNftCell = async nftOutPoint => await updateNftCell(nftOutPoint, UpdateActions.CLAIM)
 
 module.exports = {
   createNftCells,
   transferNftCells,
   destroyNftCell,
   lockNftCell,
+  claimNftCell,
 }

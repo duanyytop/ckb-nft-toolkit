@@ -1,7 +1,7 @@
 const fetch = require('node-fetch')
 const CKB = require('@nervosnetwork/ckb-sdk-core').default
 const { CKB_NODE_RPC, CKB_NODE_INDEXER } = require('../utils/config')
-const { FEE } = require('../utils/const')
+const { FEE } = require('../constants/script')
 
 const ckb = new CKB(CKB_NODE_RPC)
 

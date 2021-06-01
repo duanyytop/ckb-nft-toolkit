@@ -84,7 +84,6 @@ class Nft {
     const configure = parseInt(temp.slice(18, 20), 16)
     const state = parseInt(temp.slice(20, 22), 16)
     const extinfoData = decode(temp.slice(22))
-    console.log(extinfoData)
     return new Nft(version, characteristic, configure, state, extinfoData)
   }
 }

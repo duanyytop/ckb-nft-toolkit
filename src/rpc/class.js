@@ -2,7 +2,7 @@ const CKB = require('@nervosnetwork/ckb-sdk-core').default
 const { scriptToHash } = require('@nervosnetwork/ckb-sdk-utils')
 const { secp256k1LockScript, secp256k1Dep } = require('../account')
 const { getCells, collectInputs, getLiveCell } = require('../collector')
-const { FEE, IssuerTypeScript, ClassTypeScript, IssuerTypeDep, ClassTypeDep } = require('../utils/const')
+const { FEE, IssuerTypeScript, ClassTypeScript, IssuerTypeDep, ClassTypeDep } = require('../constants/script')
 const { CKB_NODE_RPC, PRIVATE_KEY } = require('../utils/config')
 const { u32ToBe, utf8ToHex, remove0x } = require('../utils/hex')
 const { Issuer } = require('../models/issuer')
@@ -48,7 +48,7 @@ const createClassCells = async (issuerTypeArgs, classCount = 1) => {
     0,
     100,
     0,
-    2,
+    1,
     utf8ToHex('First NFT'),
     utf8ToHex('Description'),
     utf8ToHex('https://goldenlegend.oss-cn-hangzhou.aliyuncs.com/production/1620983974245.jpeg'),
