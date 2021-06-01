@@ -67,11 +67,11 @@ class Nft {
   }
 
   addExtInfo(extInfo) {
-    if ((this.#configure & 0b0000_0100) === 0b0000_0000) {
-      this.#extension = this.#extension + encode(extInfo)
-    } else {
-      throw new Error('The NFT cell cannot be added extension info data.')
-    }
+    // if ((this.#configure & 0b0000_0100) === 0b0000_0000) {
+    this.#extension = this.#extension + encode(extInfo)
+    // } else {
+    //   throw new Error('The NFT cell cannot be added extension info data.')
+    // }
   }
 
   static fromString(data) {

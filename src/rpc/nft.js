@@ -9,7 +9,7 @@ const { TokenClass } = require('../models/class')
 const { Nft } = require('../models/nft')
 
 const ckb = new CKB(CKB_NODE_RPC)
-const NFT_CELL_CAPACITY = BigInt(135) * BigInt(100000000)
+const NFT_CELL_CAPACITY = BigInt(150) * BigInt(100000000)
 
 const generateNftOutputs = async (inputCapacity, classTypeScripts) => {
   const lock = await secp256k1LockScript()
@@ -47,7 +47,7 @@ const createNftCells = async (classTypeArgs, nftCount = 1) => {
   const classOutput = classCell.output
   let nftTypeScripts = []
   let nfts = []
-  const nft = new Nft(0, [0, 0, 0, 0, 0, 0, 0, 0], 1, 0, '').toString()
+  const nft = new Nft(0, [0, 0, 0, 0, 0, 0, 0, 0], 0, 0, '').toString()
   for (let i = 0; i < nftCount; i++) {
     nftTypeScripts.push({
       ...NFTTypeScript,
@@ -144,7 +144,7 @@ const destroyNftCell = async nftOutPoint => {
   return txHash
 }
 
-const updateNftCell = async (nftOutPoint, action) => {
+const updateNftCell = async (nftOutPoint, action, extInfo) => {
   if (!action) {
     throw new Error('Action is not defined ')
   }
@@ -166,6 +166,9 @@ const updateNftCell = async (nftOutPoint, action) => {
       break
     case UpdateActions.CLAIM:
       nft.claim()
+      break
+    case UpdateActions.ADD_EXT_INFO:
+      nft.addExtInfo(extInfo)
       break
     default:
       break
@@ -194,10 +197,16 @@ const lockNftCell = async nftOutPoint => await updateNftCell(nftOutPoint, Update
 
 const claimNftCell = async nftOutPoint => await updateNftCell(nftOutPoint, UpdateActions.CLAIM)
 
+const addExtInfoToNftCell = async nftOutPoint => {
+  const extInfo = '0x5678'
+  return await updateNftCell(nftOutPoint, UpdateActions.ADD_EXT_INFO, extInfo)
+}
+
 module.exports = {
   createNftCells,
   transferNftCells,
   destroyNftCell,
   lockNftCell,
   claimNftCell,
+  addExtInfoToNftCell,
 }
