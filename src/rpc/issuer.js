@@ -1,7 +1,7 @@
 const CKB = require('@nervosnetwork/ckb-sdk-core').default
 const { serializeInput, blake2b, hexToBytes } = require('@nervosnetwork/ckb-sdk-utils')
 const { secp256k1LockScript, secp256k1Dep } = require('../account')
-const { getCells, collectInputs } = require('../collector')
+const { getCells, collectInputs, getLiveCell } = require('../collector')
 const { FEE, IssuerTypeScript, IssuerTypeDep } = require('../constants/script')
 const { CKB_NODE_RPC, PRIVATE_KEY } = require('../utils/config')
 const { u64ToLe } = require('../utils/hex')
@@ -60,6 +60,74 @@ const createIssuerCell = async () => {
   return txHash
 }
 
+const destroyIssuerCell = async issuerOutPoint => {
+  const inputs = [
+    {
+      previousOutput: issuerOutPoint,
+      since: '0x0',
+    },
+  ]
+  const issuerCell = await getLiveCell(issuerOutPoint)
+  const output = issuerCell.output
+  output.capacity = `0x${(BigInt(output.capacity) - FEE).toString(16)}`
+  output.type = null
+  const outputs = [output]
+  const outputsData = ['0x']
+
+  const cellDeps = [await secp256k1Dep(), IssuerTypeDep]
+
+  const rawTx = {
+    version: '0x0',
+    cellDeps,
+    headerDeps: [],
+    inputs,
+    outputs,
+    outputsData,
+  }
+  rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
+  const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
+  console.log(JSON.stringify(signedTx))
+  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  console.info(`Destroy issuer cell tx has been sent with tx hash ${txHash}`)
+  return txHash
+}
+
+const updateIssuerCell = async issuerOutPoint => {
+  const inputs = [
+    {
+      previousOutput: issuerOutPoint,
+      since: '0x0',
+    },
+  ]
+
+  const issuerCell = await getLiveCell(issuerOutPoint)
+  const outputs = [issuerCell.output]
+  outputs[0].capacity = `0x${(BigInt(outputs[0].capacity) - FEE).toString(16)}`
+
+  let issuer = Issuer.fromString(issuerCell.data.content)
+  issuer.updateInfo('0x1234')
+  let outputsData = [issuer.toString()]
+
+  const cellDeps = [await secp256k1Dep(), IssuerTypeDep]
+
+  const rawTx = {
+    version: '0x0',
+    cellDeps,
+    headerDeps: [],
+    inputs,
+    outputs,
+    outputsData,
+  }
+  rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
+  const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
+  console.log(JSON.stringify(signedTx))
+  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  console.info(`Update issuer cell tx has been sent with tx hash ${txHash}`)
+  return txHash
+}
+
 module.exports = {
   createIssuerCell,
+  destroyIssuerCell,
+  updateIssuerCell,
 }

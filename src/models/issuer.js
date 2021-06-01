@@ -33,6 +33,10 @@ class Issuer {
     this.#classCount = count
   }
 
+  updateInfo(info) {
+    this.#info = info
+  }
+
   static fromString(data) {
     const temp = remove0x(data)
     if (temp.length < 18) {
