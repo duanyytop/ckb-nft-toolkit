@@ -48,7 +48,7 @@ const createClassCells = async (issuerTypeArgs, classCount = 1) => {
     0,
     100,
     0,
-    192,
+    240,
     utf8ToHex('First NFT'),
     utf8ToHex('Description'),
     utf8ToHex('https://goldenlegend.oss-cn-hangzhou.aliyuncs.com/production/1620983974245.jpeg'),
