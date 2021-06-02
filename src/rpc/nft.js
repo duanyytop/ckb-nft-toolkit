@@ -1,7 +1,7 @@
 const CKB = require('@nervosnetwork/ckb-sdk-core').default
 const { secp256k1LockScript, secp256k1Dep, receiverSecp256k1Lock } = require('../account')
 const { getCells, collectInputs, getLiveCell } = require('../collector')
-const { FEE, NFTTypeScript, ClassTypeScript, ClassTypeDep, NFTTypeDep } = require('../constants/script')
+const { FEE, NFTTypeScript, ClassTypeScript, ClassTypeDep, NFTTypeDep, IssuerTypeDep } = require('../constants/script')
 const { UpdateActions } = require('../constants/types')
 const { CKB_NODE_RPC, PRIVATE_KEY } = require('../utils/config')
 const { u32ToBe } = require('../utils/hex')
@@ -47,7 +47,7 @@ const createNftCells = async (classTypeArgs, nftCount = 1) => {
   const classOutput = classCell.output
   let nftTypeScripts = []
   let nfts = []
-  const nft = new Nft(0, [0, 0, 0, 0, 0, 0, 0, 0], 0, 0, '').toString()
+  const nft = new Nft(0, [0, 0, 0, 0, 0, 0, 0, 0], 192, 0, '').toString()
   for (let i = 0; i < nftCount; i++) {
     nftTypeScripts.push({
       ...NFTTypeScript,
@@ -144,6 +144,90 @@ const destroyNftCell = async nftOutPoint => {
   return txHash
 }
 
+const destroyNftCellWithIssuerInput = async (issuerOutPoint, nftOutPoint) => {
+  const inputs = [
+    {
+      previousOutput: issuerOutPoint,
+      since: '0x0',
+    },
+    {
+      previousOutput: nftOutPoint,
+      since: '0x0',
+    },
+  ]
+
+  let outputs = []
+  let outputsData = []
+  const issuerCell = await getLiveCell(issuerOutPoint)
+  outputs.push(issuerCell.output)
+  outputs[0].capacity = `0x${(BigInt(outputs[0].capacity) - FEE).toString(16)}`
+  outputsData.push(issuerCell.data.content)
+
+  const nftCell = await getLiveCell(nftOutPoint)
+  outputs.push(nftCell.output)
+  outputs[1].type = null
+  outputsData.push('0x')
+
+  const cellDeps = [await secp256k1Dep(), NFTTypeDep, IssuerTypeDep]
+
+  const rawTx = {
+    version: '0x0',
+    cellDeps,
+    headerDeps: [],
+    inputs,
+    outputs,
+    outputsData,
+  }
+  rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
+  const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
+  console.log(JSON.stringify(signedTx))
+  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  console.info(`Destroy nft cell with issuer input has been sent with tx hash ${txHash}`)
+  return txHash
+}
+
+const destroyNftCellWithClassInput = async (classOutPoint, nftOutPoint) => {
+  const inputs = [
+    {
+      previousOutput: classOutPoint,
+      since: '0x0',
+    },
+    {
+      previousOutput: nftOutPoint,
+      since: '0x0',
+    },
+  ]
+
+  let outputs = []
+  let outputsData = []
+  const classCell = await getLiveCell(classOutPoint)
+  outputs.push(classCell.output)
+  outputs[0].capacity = `0x${(BigInt(outputs[0].capacity) - FEE).toString(16)}`
+  outputsData.push(classCell.data.content)
+
+  const nftCell = await getLiveCell(nftOutPoint)
+  outputs.push(nftCell.output)
+  outputs[1].type = null
+  outputsData.push('0x')
+
+  const cellDeps = [await secp256k1Dep(), NFTTypeDep, ClassTypeDep]
+
+  const rawTx = {
+    version: '0x0',
+    cellDeps,
+    headerDeps: [],
+    inputs,
+    outputs,
+    outputsData,
+  }
+  rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
+  const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
+  console.log(JSON.stringify(signedTx))
+  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  console.info(`Destroy nft cell with class input has been sent with tx hash ${txHash}`)
+  return txHash
+}
+
 const updateNftCell = async (nftOutPoint, action, extInfo) => {
   if (!action) {
     throw new Error('Action is not defined ')
@@ -209,4 +293,6 @@ module.exports = {
   lockNftCell,
   claimNftCell,
   addExtInfoToNftCell,
+  destroyNftCellWithIssuerInput,
+  destroyNftCellWithClassInput,
 }
