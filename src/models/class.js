@@ -50,6 +50,10 @@ class TokenClass {
     this.#issued = issued
   }
 
+  updateName(name) {
+    this.#name = name
+  }
+
   get total() {
     return this.#total
   }

@@ -84,6 +84,74 @@ const createClassCells = async (issuerTypeArgs, classCount = 1) => {
   return txHash
 }
 
+const destroyClassCell = async classOutPoint => {
+  const inputs = [
+    {
+      previousOutput: classOutPoint,
+      since: '0x0',
+    },
+  ]
+  const classCell = await getLiveCell(classOutPoint)
+  const output = classCell.output
+  output.capacity = `0x${(BigInt(output.capacity) - FEE).toString(16)}`
+  output.type = null
+  const outputs = [output]
+  const outputsData = ['0x']
+
+  const cellDeps = [await secp256k1Dep(), ClassTypeDep]
+
+  const rawTx = {
+    version: '0x0',
+    cellDeps,
+    headerDeps: [],
+    inputs,
+    outputs,
+    outputsData,
+  }
+  rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
+  const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
+  console.log(JSON.stringify(signedTx))
+  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  console.info(`Destroy class cell tx has been sent with tx hash ${txHash}`)
+  return txHash
+}
+
+const updateClassCell = async classOutPoint => {
+  const inputs = [
+    {
+      previousOutput: classOutPoint,
+      since: '0x0',
+    },
+  ]
+
+  const classCell = await getLiveCell(classOutPoint)
+  const outputs = [classCell.output]
+  outputs[0].capacity = `0x${(BigInt(outputs[0].capacity) - FEE).toString(16)}`
+
+  let tokenClass = TokenClass.fromString(classCell.data.content)
+  tokenClass.updateName(utf8ToHex('Second NFT'))
+  let outputsData = [tokenClass.toString()]
+
+  const cellDeps = [await secp256k1Dep(), ClassTypeDep]
+
+  const rawTx = {
+    version: '0x0',
+    cellDeps,
+    headerDeps: [],
+    inputs,
+    outputs,
+    outputsData,
+  }
+  rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
+  const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
+  console.log(JSON.stringify(signedTx))
+  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  console.info(`Update class cell tx has been sent with tx hash ${txHash}`)
+  return txHash
+}
+
 module.exports = {
   createClassCells,
+  destroyClassCell,
+  updateClassCell,
 }
