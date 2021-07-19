@@ -7,7 +7,7 @@ const IssuerTypeScript = {
 }
 
 const IssuerTypeDep = {
-  outPoint: { txHash: '0xeb124c00ec883e1a93660d1b96946b3b9dd6229010e268d9ec118f3bfd69c200', index: '0x0' },
+  outPoint: { txHash: '0xbd262c87a84c08ea3bc141700cf55c1a285009de0e22c247a8d9597b4fc491e6', index: '0x0' },
   depType: 'code',
 }
 
@@ -18,7 +18,7 @@ const ClassTypeScript = {
 }
 
 const ClassTypeDep = {
-  outPoint: { txHash: '0xeb124c00ec883e1a93660d1b96946b3b9dd6229010e268d9ec118f3bfd69c200', index: '0x1' },
+  outPoint: { txHash: '0xbd262c87a84c08ea3bc141700cf55c1a285009de0e22c247a8d9597b4fc491e6', index: '0x1' },
   depType: 'code',
 }
 
@@ -29,7 +29,7 @@ const NFTTypeScript = {
 }
 
 const NFTTypeDep = {
-  outPoint: { txHash: '0xeb124c00ec883e1a93660d1b96946b3b9dd6229010e268d9ec118f3bfd69c200', index: '0x2' },
+  outPoint: { txHash: '0xbd262c87a84c08ea3bc141700cf55c1a285009de0e22c247a8d9597b4fc491e6', index: '0x2' },
   depType: 'code',
 }
 
