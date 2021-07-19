@@ -46,7 +46,7 @@ const createClassCells = async (issuerTypeArgs, classCount = 1) => {
   let tokenClasses = []
   const tokenClass = new TokenClass(
     0,
-    100,
+    1000,
     0,
     0,
     utf8ToHex('First NFT'),

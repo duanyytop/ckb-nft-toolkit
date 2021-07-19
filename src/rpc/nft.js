@@ -228,7 +228,7 @@ const destroyNftCellWithClassInput = async (classOutPoint, nftOutPoint) => {
   return txHash
 }
 
-const updateNftCell = async (nftOutPoint, action, extInfo) => {
+const updateNftCell = async (nftOutPoint, action, extInfo, characteristic) => {
   if (!action) {
     throw new Error('Action is not defined ')
   }
@@ -253,6 +253,9 @@ const updateNftCell = async (nftOutPoint, action, extInfo) => {
       break
     case UpdateActions.ADD_EXT_INFO:
       nft.addExtInfo(extInfo)
+      break
+    case UpdateActions.UPDATE_CHARACTERISTIC:
+      nft.updateCharacteristic(characteristic)
       break
     default:
       break
@@ -286,6 +289,11 @@ const addExtInfoToNftCell = async nftOutPoint => {
   return await updateNftCell(nftOutPoint, UpdateActions.ADD_EXT_INFO, extInfo)
 }
 
+const updateNftCharacteristic = async nftOutPoint => {
+  const characteristic = [1, 2, 3, 4, 5, 6, 7, 8]
+  return await updateNftCell(nftOutPoint, UpdateActions.UPDATE_CHARACTERISTIC, null, characteristic)
+}
+
 module.exports = {
   createNftCells,
   transferNftCells,
@@ -293,6 +301,7 @@ module.exports = {
   lockNftCell,
   claimNftCell,
   addExtInfoToNftCell,
+  updateNftCharacteristic,
   destroyNftCellWithIssuerInput,
   destroyNftCellWithClassInput,
 }
