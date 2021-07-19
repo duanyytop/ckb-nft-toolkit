@@ -10,6 +10,7 @@ const { Nft } = require('../models/nft')
 
 const ckb = new CKB(CKB_NODE_RPC)
 const NFT_CELL_CAPACITY = BigInt(150) * BigInt(100000000)
+const NORMAL_CELL_CAPACITY = BigInt(65) * BigInt(100000000)
 
 const generateNftOutputs = async (inputCapacity, classTypeScripts) => {
   const lock = await secp256k1LockScript()
@@ -47,7 +48,7 @@ const createNftCells = async (classTypeArgs, nftCount = 1) => {
   const classOutput = classCell.output
   let nftTypeScripts = []
   let nfts = []
-  const nft = new Nft(0, [0, 0, 0, 0, 0, 0, 0, 0], 0, 0, '').toString()
+  const nft = new Nft(0, [0, 0, 0, 0, 0, 0, 0, 0], 200, 0, '').toString()
   for (let i = 0; i < nftCount; i++) {
     nftTypeScripts.push({
       ...NFTTypeScript,
@@ -144,31 +145,32 @@ const destroyNftCell = async nftOutPoint => {
   return txHash
 }
 
-const destroyNftCellWithIssuerInput = async (issuerOutPoint, nftOutPoint) => {
+const destroyNftCellWithIssuerLock = async (issuerOutPoint, nftOutPoint) => {
+  const lock = await secp256k1LockScript()
+  const liveCells = await getCells(lock)
+  const { inputs: normalCells } = collectInputs(liveCells, NORMAL_CELL_CAPACITY)
+
   const inputs = [
-    {
-      previousOutput: issuerOutPoint,
-      since: '0x0',
-    },
+    normalCells[0],
     {
       previousOutput: nftOutPoint,
       since: '0x0',
     },
   ]
+  const issuerCellDep = { outPoint: issuerOutPoint, depType: 'code' }
 
   let outputs = []
-  let outputsData = []
-  const issuerCell = await getLiveCell(issuerOutPoint)
-  outputs.push(issuerCell.output)
+  const issuerNormalCell = await getLiveCell(normalCells[0].previousOutput)
+  outputs.push(issuerNormalCell.output)
   outputs[0].capacity = `0x${(BigInt(outputs[0].capacity) - FEE).toString(16)}`
-  outputsData.push(issuerCell.data.content)
 
   const nftCell = await getLiveCell(nftOutPoint)
   outputs.push(nftCell.output)
   outputs[1].type = null
-  outputsData.push('0x')
 
-  const cellDeps = [await secp256k1Dep(), NFTTypeDep, IssuerTypeDep]
+  const outputsData = ['0x', '0x']
+
+  const cellDeps = [issuerCellDep, await secp256k1Dep(), NFTTypeDep, IssuerTypeDep]
 
   const rawTx = {
     version: '0x0',
@@ -182,35 +184,37 @@ const destroyNftCellWithIssuerInput = async (issuerOutPoint, nftOutPoint) => {
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
   console.log(JSON.stringify(signedTx))
   const txHash = await ckb.rpc.sendTransaction(signedTx)
-  console.info(`Destroy nft cell with issuer input has been sent with tx hash ${txHash}`)
+  console.info(`Destroy nft cell with issuer lock has been sent with tx hash ${txHash}`)
   return txHash
 }
 
-const destroyNftCellWithClassInput = async (classOutPoint, nftOutPoint) => {
+const destroyNftCellWithClassLock = async (classOutPoint, nftOutPoint) => {
+  const lock = await secp256k1LockScript()
+  const liveCells = await getCells(lock)
+  const { inputs: normalCells } = collectInputs(liveCells, NORMAL_CELL_CAPACITY)
+
   const inputs = [
-    {
-      previousOutput: classOutPoint,
-      since: '0x0',
-    },
+    normalCells[0],
     {
       previousOutput: nftOutPoint,
       since: '0x0',
     },
   ]
 
+  const classCellDep = { outPoint: classOutPoint, depType: 'code' }
+
   let outputs = []
-  let outputsData = []
-  const classCell = await getLiveCell(classOutPoint)
+  const classCell = await getLiveCell(normalCells[0].previousOutput)
   outputs.push(classCell.output)
   outputs[0].capacity = `0x${(BigInt(outputs[0].capacity) - FEE).toString(16)}`
-  outputsData.push(classCell.data.content)
 
   const nftCell = await getLiveCell(nftOutPoint)
   outputs.push(nftCell.output)
   outputs[1].type = null
-  outputsData.push('0x')
 
-  const cellDeps = [await secp256k1Dep(), NFTTypeDep, ClassTypeDep]
+  let outputsData = ['0x', '0x']
+
+  const cellDeps = [classCellDep, await secp256k1Dep(), NFTTypeDep, ClassTypeDep]
 
   const rawTx = {
     version: '0x0',
@@ -224,7 +228,7 @@ const destroyNftCellWithClassInput = async (classOutPoint, nftOutPoint) => {
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
   console.log(JSON.stringify(signedTx))
   const txHash = await ckb.rpc.sendTransaction(signedTx)
-  console.info(`Destroy nft cell with class input has been sent with tx hash ${txHash}`)
+  console.info(`Destroy nft cell with class lock has been sent with tx hash ${txHash}`)
   return txHash
 }
 
@@ -302,6 +306,6 @@ module.exports = {
   claimNftCell,
   addExtInfoToNftCell,
   updateNftCharacteristic,
-  destroyNftCellWithIssuerInput,
-  destroyNftCellWithClassInput,
+  destroyNftCellWithIssuerLock,
+  destroyNftCellWithClassLock,
 }
