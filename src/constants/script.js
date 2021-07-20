@@ -29,7 +29,7 @@ const NFTTypeScript = {
 }
 
 const NFTTypeDep = {
-  outPoint: { txHash: '0x4b88db39e921dde8d2fb36fe2b93c2e7dbfd2f5343ef9c3d5905a1dd827fb87d', index: '0x0' },
+  outPoint: { txHash: '0xd27a5ff185abe09bba64d42d43f63dd95bfe005f601958f1efe8ee46a6f1a276', index: '0x0' },
   depType: 'code',
 }
 

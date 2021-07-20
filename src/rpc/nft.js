@@ -48,7 +48,7 @@ const createNftCells = async (classTypeArgs, nftCount = 1) => {
   const classOutput = classCell.output
   let nftTypeScripts = []
   let nfts = []
-  const nft = new Nft(0, [0, 0, 0, 0, 0, 0, 0, 0], 200, 0, '').toString()
+  const nft = new Nft(0, [0, 0, 0, 0, 0, 0, 0, 0], 200, 3, '').toString()
   for (let i = 0; i < nftCount; i++) {
     nftTypeScripts.push({
       ...NFTTypeScript,
@@ -232,19 +232,37 @@ const destroyNftCellWithClassLock = async (classOutPoint, nftOutPoint) => {
   return txHash
 }
 
-const updateNftCell = async (nftOutPoint, action, extInfo, characteristic) => {
+const updateNftCell = async (
+  nftOutPoint,
+  action,
+  { extInfo, characteristic, issuerOutPoint, classOutPoint, state },
+) => {
   if (!action) {
     throw new Error('Action is not defined ')
   }
-  const inputs = [
-    {
-      previousOutput: nftOutPoint,
-      since: '0x0',
-    },
-  ]
+
+  let inputs = []
+  let outputs = []
+  let outputsData = []
+  if (action === UpdateActions.UPDATE_STATE_WITH_ISSUER || action === UpdateActions.UPDATE_STATE_WITH_CLASS) {
+    const lock = await secp256k1LockScript()
+    const liveCells = await getCells(lock)
+    const { inputs: normalCells } = collectInputs(liveCells, NORMAL_CELL_CAPACITY)
+
+    inputs.push(normalCells[0])
+
+    const issuerOrClassCell = await getLiveCell(normalCells[0].previousOutput)
+    outputs.push(issuerOrClassCell.output)
+    outputsData.push('0x')
+  }
+
+  inputs.push({
+    previousOutput: nftOutPoint,
+    since: '0x0',
+  })
 
   const nftCell = await getLiveCell(nftOutPoint)
-  const outputs = [nftCell.output]
+  outputs.push(nftCell.output)
   outputs[0].capacity = `0x${(BigInt(outputs[0].capacity) - FEE).toString(16)}`
 
   let nft = Nft.fromString(nftCell.data.content)
@@ -261,12 +279,22 @@ const updateNftCell = async (nftOutPoint, action, extInfo, characteristic) => {
     case UpdateActions.UPDATE_CHARACTERISTIC:
       nft.updateCharacteristic(characteristic)
       break
+    case UpdateActions.UPDATE_STATE_WITH_ISSUER:
+    case UpdateActions.UPDATE_STATE_WITH_CLASS:
+      nft.updateState(state)
+      break
     default:
       break
   }
-  let outputsData = [nft.toString()]
+  outputsData.push(nft.toString())
 
-  const cellDeps = [await secp256k1Dep(), NFTTypeDep]
+  let cellDeps = []
+  if (action == UpdateActions.UPDATE_STATE_WITH_ISSUER) {
+    cellDeps.push({ outPoint: issuerOutPoint, depType: 'code' })
+  } else if (action == UpdateActions.UPDATE_STATE_WITH_CLASS) {
+    cellDeps.push({ outPoint: classOutPoint, depType: 'code' })
+  }
+  cellDeps = cellDeps.concat([await secp256k1Dep(), NFTTypeDep])
 
   const rawTx = {
     version: '0x0',
@@ -290,12 +318,22 @@ const claimNftCell = async nftOutPoint => await updateNftCell(nftOutPoint, Updat
 
 const addExtInfoToNftCell = async nftOutPoint => {
   const extInfo = '0x5678'
-  return await updateNftCell(nftOutPoint, UpdateActions.ADD_EXT_INFO, extInfo)
+  return await updateNftCell(nftOutPoint, UpdateActions.ADD_EXT_INFO, { extInfo })
 }
 
 const updateNftCharacteristic = async nftOutPoint => {
   const characteristic = [1, 2, 3, 4, 5, 6, 7, 8]
-  return await updateNftCell(nftOutPoint, UpdateActions.UPDATE_CHARACTERISTIC, null, characteristic)
+  return await updateNftCell(nftOutPoint, UpdateActions.UPDATE_CHARACTERISTIC, { characteristic })
+}
+
+const updateNftStateWithIssuer = async (nftOutPoint, issuerOutPoint) => {
+  const state = 0
+  return await updateNftCell(nftOutPoint, UpdateActions.UPDATE_STATE_WITH_ISSUER, { state, issuerOutPoint })
+}
+
+const updateNftStateWithClass = async (nftOutPoint, classOutPoint) => {
+  const state = 0
+  return await updateNftCell(nftOutPoint, UpdateActions.UPDATE_STATE_WITH_CLASS, { state, classOutPoint })
 }
 
 module.exports = {
@@ -306,6 +344,8 @@ module.exports = {
   claimNftCell,
   addExtInfoToNftCell,
   updateNftCharacteristic,
+  updateNftStateWithIssuer,
+  updateNftStateWithClass,
   destroyNftCellWithIssuerLock,
   destroyNftCellWithClassLock,
 }

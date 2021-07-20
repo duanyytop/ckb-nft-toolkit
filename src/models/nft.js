@@ -82,6 +82,10 @@ class Nft {
     }
   }
 
+  updateState(state) {
+    this.#state = state
+  }
+
   static fromString(data) {
     const temp = remove0x(data)
     if (temp.length < 22) {
