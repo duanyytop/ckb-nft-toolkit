@@ -1,17 +1,17 @@
-const CKB = require('@nervosnetwork/ckb-sdk-core').default
-const { scriptToHash } = require('@nervosnetwork/ckb-sdk-utils')
-const { secp256k1LockScript, secp256k1Dep } = require('../account')
-const { getCells, collectInputs, getLiveCell } = require('../collector')
-const { FEE, IssuerTypeScript, ClassTypeScript, IssuerTypeDep, ClassTypeDep } = require('../constants/script')
-const { CKB_NODE_RPC, PRIVATE_KEY } = require('../utils/config')
-const { u32ToBe, utf8ToHex, remove0x } = require('../utils/hex')
-const { Issuer } = require('../models/issuer')
-const { TokenClass } = require('../models/class')
+import CKB from '@nervosnetwork/ckb-sdk-core'
+import { scriptToHash } from '@nervosnetwork/ckb-sdk-utils'
+import { secp256k1LockScript, secp256k1Dep } from '../account'
+import { getCells, collectInputs, getLiveCell } from '../collector'
+import { FEE, IssuerTypeScript, ClassTypeScript, IssuerTypeDep, ClassTypeDep } from '../constants/script'
+import { CKB_NODE_RPC, PRIVATE_KEY } from '../utils/config'
+import { u32ToBe, utf8ToHex, remove0x } from '../utils/hex'
+import Issuer from '../models/issuer'
+import TokenClass from '../models/class'
 
 const ckb = new CKB(CKB_NODE_RPC)
 const CLASS_CELL_CAPACITY = BigInt(240) * BigInt(100000000)
 
-const generateClassOutputs = async (inputCapacity, classTypeScripts) => {
+export const generateClassOutputs = async (inputCapacity: bigint, classTypeScripts) => {
   const lock = await secp256k1LockScript()
   let outputs = classTypeScripts.map(classTypeScript => ({
     capacity: `0x${CLASS_CELL_CAPACITY.toString(16)}`,
@@ -26,14 +26,14 @@ const generateClassOutputs = async (inputCapacity, classTypeScripts) => {
   return outputs
 }
 
-const createClassCells = async (issuerTypeArgs, classCount = 1) => {
+export const createClassCells = async (issuerTypeArgs: Hex, classCount = 1) => {
   const lock = await secp256k1LockScript()
   const liveCells = await getCells(lock)
   const { inputs, capacity } = collectInputs(liveCells, CLASS_CELL_CAPACITY * BigInt(classCount))
 
   const issuerType = { ...IssuerTypeScript, args: issuerTypeArgs }
   const issuerCells = await getCells(lock, issuerType)
-  const issuerOutPoint = { txHash: issuerCells[0].out_point.tx_hash, index: issuerCells[0].out_point.index }
+  const issuerOutPoint = { txHash: issuerCells[0].outPoint.txHash, index: issuerCells[0].outPoint.index }
   const issuerInput = {
     previousOutput: issuerOutPoint,
     since: '0x0',
@@ -75,6 +75,7 @@ const createClassCells = async (issuerTypeArgs, classCount = 1) => {
     inputs: [issuerInput, ...inputs],
     outputs: [issuerOutput, ...outputs],
     outputsData: [outputIssuer.toString(), ...tokenClasses, '0x'],
+    witnesses: [],
   }
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
@@ -84,7 +85,7 @@ const createClassCells = async (issuerTypeArgs, classCount = 1) => {
   return txHash
 }
 
-const destroyClassCell = async classOutPoint => {
+export const destroyClassCell = async classOutPoint => {
   const inputs = [
     {
       previousOutput: classOutPoint,
@@ -107,6 +108,7 @@ const destroyClassCell = async classOutPoint => {
     inputs,
     outputs,
     outputsData,
+    witnesses: [],
   }
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
@@ -116,7 +118,7 @@ const destroyClassCell = async classOutPoint => {
   return txHash
 }
 
-const updateClassCell = async classOutPoint => {
+export const updateClassCell = async classOutPoint => {
   const inputs = [
     {
       previousOutput: classOutPoint,
@@ -141,6 +143,7 @@ const updateClassCell = async classOutPoint => {
     inputs,
     outputs,
     outputsData,
+    witnesses: [],
   }
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
@@ -148,10 +151,4 @@ const updateClassCell = async classOutPoint => {
   const txHash = await ckb.rpc.sendTransaction(signedTx)
   console.info(`Update class cell tx has been sent with tx hash ${txHash}`)
   return txHash
-}
-
-module.exports = {
-  createClassCells,
-  destroyClassCell,
-  updateClassCell,
 }

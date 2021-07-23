@@ -1,4 +1,4 @@
-const { createClassCells, destroyClassCell, updateClassCell } = require('../src/rpc/class')
+import { createClassCells, destroyClassCell, updateClassCell } from '../rpc/class'
 
 const run = async () => {
   await createClassCells('0xaac1f097b083e142735f679b13c347bc837e05b5', 1)

@@ -1,11 +1,12 @@
-const fetch = require('node-fetch')
-const CKB = require('@nervosnetwork/ckb-sdk-core').default
-const { CKB_NODE_RPC, CKB_NODE_INDEXER } = require('../utils/config')
-const { FEE } = require('../constants/script')
+import fetch from 'node-fetch'
+import CKB from '@nervosnetwork/ckb-sdk-core'
+import { CKB_NODE_RPC, CKB_NODE_INDEXER } from '../utils/config'
+import { FEE } from '../constants/script'
+import { toCamelcase } from '../utils/util'
 
 const ckb = new CKB(CKB_NODE_RPC)
 
-const getCells = async (lock, type = null) => {
+export const getCells = async (lock: CKBComponents.Script, type?: CKBComponents.Script): Promise<IndexerCell[]> => {
   const filter = type
     ? {
         script: {
@@ -45,20 +46,20 @@ const getCells = async (lock, type = null) => {
       body,
     })
     res = await res.json()
-    return res.result.objects
+    return toCamelcase<IndexerCell[]>(res.result.objects)
   } catch (error) {
     console.error('error', error)
   }
 }
 
-const collectInputs = (liveCells, needCapacity) => {
-  let inputs = []
+export const collectInputs = (liveCells: IndexerCell[], needCapacity: bigint) => {
+  let inputs: CKBComponents.CellInput[] = []
   let sum = BigInt(0)
   for (let cell of liveCells) {
     inputs.push({
       previousOutput: {
-        txHash: cell.out_point.tx_hash,
-        index: cell.out_point.index,
+        txHash: cell.outPoint.txHash,
+        index: cell.outPoint.index,
       },
       since: '0x0',
     })
@@ -73,13 +74,7 @@ const collectInputs = (liveCells, needCapacity) => {
   return { inputs, capacity: sum }
 }
 
-const getLiveCell = async outPoint => {
+export const getLiveCell = async outPoint => {
   const { cell } = await ckb.rpc.getLiveCell(outPoint, true)
   return cell
-}
-
-module.exports = {
-  getCells,
-  collectInputs,
-  getLiveCell,
 }

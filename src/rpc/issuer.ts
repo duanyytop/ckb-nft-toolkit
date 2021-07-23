@@ -1,17 +1,17 @@
-const CKB = require('@nervosnetwork/ckb-sdk-core').default
-const { serializeInput, blake2b, hexToBytes } = require('@nervosnetwork/ckb-sdk-utils')
-const { secp256k1LockScript, secp256k1Dep } = require('../account')
-const { getCells, collectInputs, getLiveCell } = require('../collector')
-const { FEE, IssuerTypeScript, IssuerTypeDep } = require('../constants/script')
-const { CKB_NODE_RPC, PRIVATE_KEY } = require('../utils/config')
-const { u64ToLe } = require('../utils/hex')
-const { Issuer } = require('../models/issuer')
+import CKB from '@nervosnetwork/ckb-sdk-core'
+import { serializeInput, blake2b, hexToBytes } from '@nervosnetwork/ckb-sdk-utils'
+import { secp256k1LockScript, secp256k1Dep } from '../account'
+import { getCells, collectInputs, getLiveCell } from '../collector'
+import { FEE, IssuerTypeScript, IssuerTypeDep } from '../constants/script'
+import { CKB_NODE_RPC, PRIVATE_KEY } from '../utils/config'
+import { u64ToLe } from '../utils/hex'
+import Issuer from '../models/issuer'
 
 const ckb = new CKB(CKB_NODE_RPC)
 const ISSUER_CELL_CAPACITY = BigInt(150) * BigInt(100000000)
 const PERSONAL = new Uint8Array([99, 107, 98, 45, 100, 101, 102, 97, 117, 108, 116, 45, 104, 97, 115, 104])
 
-const generateIssuerTypeArgs = (firstInput, firstOutputIndex) => {
+const generateIssuerTypeArgs = (firstInput: CKBComponents.CellInput, firstOutputIndex: bigint) => {
   const input = hexToBytes(serializeInput(firstInput))
   const s = blake2b(32, null, null, PERSONAL)
   s.update(input)
@@ -19,9 +19,9 @@ const generateIssuerTypeArgs = (firstInput, firstOutputIndex) => {
   return `0x${s.digest('hex').slice(0, 40)}`
 }
 
-const generateIssuerOutputs = async (inputCapacity, issuerType) => {
+const generateIssuerOutputs = async (inputCapacity: bigint, issuerType: CKBComponents.Script) => {
   const lock = await secp256k1LockScript()
-  let outputs = [
+  let outputs: CKBComponents.CellOutput[] = [
     {
       capacity: `0x${ISSUER_CELL_CAPACITY.toString(16)}`,
       lock,
@@ -36,7 +36,7 @@ const generateIssuerOutputs = async (inputCapacity, issuerType) => {
   return outputs
 }
 
-const createIssuerCell = async () => {
+export const createIssuerCell = async () => {
   const lock = await secp256k1LockScript()
   const liveCells = await getCells(lock)
   const { inputs, capacity } = collectInputs(liveCells, ISSUER_CELL_CAPACITY)
@@ -51,6 +51,7 @@ const createIssuerCell = async () => {
     inputs,
     outputs,
     outputsData: [issuer.toString(), '0x'],
+    witnesses: [],
   }
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
@@ -60,7 +61,7 @@ const createIssuerCell = async () => {
   return txHash
 }
 
-const destroyIssuerCell = async issuerOutPoint => {
+export const destroyIssuerCell = async issuerOutPoint => {
   const inputs = [
     {
       previousOutput: issuerOutPoint,
@@ -83,6 +84,7 @@ const destroyIssuerCell = async issuerOutPoint => {
     inputs,
     outputs,
     outputsData,
+    witnesses: [],
   }
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
@@ -92,7 +94,7 @@ const destroyIssuerCell = async issuerOutPoint => {
   return txHash
 }
 
-const updateIssuerCell = async issuerOutPoint => {
+export const updateIssuerCell = async issuerOutPoint => {
   const inputs = [
     {
       previousOutput: issuerOutPoint,
@@ -117,6 +119,7 @@ const updateIssuerCell = async issuerOutPoint => {
     inputs,
     outputs,
     outputsData,
+    witnesses: [],
   }
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
@@ -124,10 +127,4 @@ const updateIssuerCell = async issuerOutPoint => {
   const txHash = await ckb.rpc.sendTransaction(signedTx)
   console.info(`Update issuer cell tx has been sent with tx hash ${txHash}`)
   return txHash
-}
-
-module.exports = {
-  createIssuerCell,
-  destroyIssuerCell,
-  updateIssuerCell,
 }
