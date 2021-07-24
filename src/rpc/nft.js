@@ -48,7 +48,7 @@ const createNftCells = async (classTypeArgs, nftCount = 1) => {
   const classOutput = classCell.output
   let nftTypeScripts = []
   let nfts = []
-  const nft = new Nft(0, [0, 0, 0, 0, 0, 0, 0, 0], 200, 3, '').toString()
+  const nft = new Nft(0, [0, 0, 0, 0, 0, 0, 0, 0], 0, 0, '').toString()
   for (let i = 0; i < nftCount; i++) {
     nftTypeScripts.push({
       ...NFTTypeScript,

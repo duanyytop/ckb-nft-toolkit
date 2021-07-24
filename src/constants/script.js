@@ -1,35 +1,35 @@
 const FEE = BigInt(2500)
 
 const IssuerTypeScript = {
-  codeHash: '0xb59879b6ea6fff985223117fa499ce84f8cfb028c4ffdfdf5d3ec19e905a11ed',
+  codeHash: '0x1474849ba9996f92941a56880ff78c0392770564414c91838db4f3a490623624',
   hashType: 'type',
   args: '',
 }
 
 const IssuerTypeDep = {
-  outPoint: { txHash: '0xbd262c87a84c08ea3bc141700cf55c1a285009de0e22c247a8d9597b4fc491e6', index: '0x0' },
+  outPoint: { txHash: '0x5654a4ec37eba62e7d7978dc1f46f7f866d926974dad136493157d7d18c357d8', index: '0x0' },
   depType: 'code',
 }
 
 const ClassTypeScript = {
-  codeHash: '0xf569e7b728c21c4bcc974e58ccd7b09ad4fcc8f932368924e1f51c15a8281aaf',
+  codeHash: '0xfaeecc12e2f4183fe9fe12d1d88e75b8d12a2ca4b117a490778da3cce8dee287',
   hashType: 'type',
   args: '',
 }
 
 const ClassTypeDep = {
-  outPoint: { txHash: '0x5a9a42fbc7a7a79feb750c5b8617a067d72d41a6d0fa0812d36e2cae956f103a', index: '0x0' },
+  outPoint: { txHash: '0xeec062b8c4cab7e3df9a5a82e067b72e7ea500ebba41927e4a829cd475d73576', index: '0x0' },
   depType: 'code',
 }
 
 const NFTTypeScript = {
-  codeHash: '0x13e8ed98cbaff01da0e22fbcaa9337ede31c66a4caae62833edfc2f60d7aa4d0',
+  codeHash: '0xf83bf4dba2c39509bf124c163d2366d8ba341f9e2fe8eaf904042bc9d9c69e4f',
   hashType: 'type',
   args: '',
 }
 
 const NFTTypeDep = {
-  outPoint: { txHash: '0xd27a5ff185abe09bba64d42d43f63dd95bfe005f601958f1efe8ee46a6f1a276', index: '0x0' },
+  outPoint: { txHash: '0xc973d56919ace8dbd510a4ba45c20ace06b8d05b32d0584646122d3fe0829ed3', index: '0x0' },
   depType: 'code',
 }
 
