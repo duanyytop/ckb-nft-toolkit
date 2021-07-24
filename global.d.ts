@@ -1,4 +1,6 @@
 /// <reference types="@nervosnetwork/ckb-types" />
+declare var TextEncoder: any
+declare var TextDecoder: any
 
 type U8 = number
 type U16 = number

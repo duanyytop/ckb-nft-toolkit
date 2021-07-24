@@ -5,11 +5,10 @@
   "repository": "git@github.com:duanyytop/ckb-nft-toolkit.git",
   "author": "duanyytop <duanyytop@gmail.com>",
   "license": "MIT",
-  "types": "global.d.ts",
   "scripts": {
-    "start:issuer": "npm run build && ts-node src/example/issuer.ts",
-    "start:class": "nodemon --watch'src/＊＊/＊.ts' --exec 'ts-node'example/class.ts",
-    "start:nft": "nodemon --watch'src/＊＊/＊.ts' --exec 'ts-node'example/nft.ts",
+    "start:issuer": "npm run build && node dist/example/issuer.js",
+    "start:class": "npm run build && node dist/example/class.js",
+    "start:nft": "npm run build && node dist/example/nft.js",
     "build": "tsc -p .",
     "lint": "eslint src/**/*.ts --fix"
   },

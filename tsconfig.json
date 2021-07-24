@@ -1,8 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es5",                               
-    "module": "es2015",  
-    "outDir": "lib",                                /* Redirect output structure to the directory. */
+    "target": "es6",                               
+    "module": "commonjs",  
+    "lib": [
+      "es6"
+    ],
+    "outDir": "dist",                                /* Redirect output structure to the directory. */
     "rootDir": "src",                               
     "moduleResolution": "node",
     "sourceMap": true,
