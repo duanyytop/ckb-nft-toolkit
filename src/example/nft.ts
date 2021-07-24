@@ -1,4 +1,4 @@
-const {
+import {
   createNftCells,
   transferNftCells,
   destroyNftCell,
@@ -10,7 +10,7 @@ const {
   updateNftCharacteristic,
   updateNftStateWithIssuer,
   updateNftStateWithClass,
-} = require('../src/rpc/nft')
+} from '../rpc/nft'
 
 const run = async () => {
   await createNftCells('0x8d060ce9dd47c7b005d0bebf9a82d1e00ed2979100000001', 80)

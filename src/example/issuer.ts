@@ -1,4 +1,4 @@
-const { createIssuerCell, destroyIssuerCell, updateIssuerCell } = require('../src/rpc/issuer')
+import { createIssuerCell, destroyIssuerCell, updateIssuerCell } from '../rpc/issuer'
 
 const run = async () => {
   await createIssuerCell()

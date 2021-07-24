@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es6",                               
+    "module": "commonjs",  
+    "lib": [
+      "es6"
+    ],
+    "outDir": "dist",                                /* Redirect output structure to the directory. */
+    "rootDir": "src",                               
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "importHelpers": true,
+    "esModuleInterop": true,     
+    "resolveJsonModule": true,                   
+    "skipLibCheck": true,                           /* Skip type checking of declaration files. */
+    "forceConsistentCasingInFileNames": true        /* Disallow inconsistently-cased references to the same file. */
+  },
+  "include": [
+    "src/**/*.ts", "global.d.ts"
+  ],
+  "exclude": [
+    "node_modules" 
+  ]
+}
