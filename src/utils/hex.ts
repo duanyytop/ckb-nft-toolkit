@@ -1,10 +1,14 @@
 import { hexToBytes, bytesToHex } from '@nervosnetwork/ckb-sdk-utils'
 
-export const remove0x = (hex: string) => {
-  if (hex.startsWith('0x')) {
+export const remove0x = (hex?: string) => {
+  if (hex?.startsWith('0x')) {
     return hex.substring(2)
   }
   return hex
+}
+
+export const append0x = (hex?: string) => {
+  return hex?.startsWith('0x') ? hex : `0x${hex}`
 }
 
 const ArrayBufferToHex = (arrayBuffer: ArrayBuffer) => {
@@ -38,6 +42,18 @@ export const u8ToHex = (u8: number) => {
   let view = new DataView(buffer)
   view.setUint8(0, u8)
   return ArrayBufferToHex(buffer)
+}
+
+export const hexToU8 = (hex: string) => {
+  const tmp = remove0x(hex)
+  if (tmp.length !== 2) {
+    throw new Error('The hex format length of u8 must be equal to 2')
+  }
+  try {
+    return parseInt(tmp, 16)
+  } catch (e) {
+    throw new Error(e)
+  }
 }
 
 export const u64ToLe = (u64: bigint) => {

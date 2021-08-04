@@ -25,6 +25,11 @@ class Issuer {
     this.info = info
   }
 
+  static fromProps(props: IssuerProps): Issuer {
+    const { version, classCount, setCount, info } = props
+    return new Issuer(version, classCount, setCount, info)
+  }
+
   static fromString(data: Hex) {
     const temp = remove0x(data)
     if (temp.length < 18) {
