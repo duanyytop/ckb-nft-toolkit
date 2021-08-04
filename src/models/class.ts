@@ -1,10 +1,10 @@
-import { u8ToHex, u32ToBe, encode, remove0x } from '../utils/hex'
+import { u8ToHex, u32ToBe, encode, remove0x, hexToU8 } from '../utils/hex'
 
 class TokenClass {
   version: U8 = 0
   total: U32 = 0
   issued: U32 = 0
-  configure: U8 = 0
+  #configure: U8 = 0
   name: DynHex = ''
   description: DynHex = ''
   renderer: DynHex = ''
@@ -14,7 +14,7 @@ class TokenClass {
     version = 0,
     total: U32,
     issued: U32,
-    configure: U8,
+    configure: Hex,
     name: DynHex,
     description: DynHex,
     renderer: DynHex,
@@ -23,7 +23,7 @@ class TokenClass {
     this.version = version
     this.total = total
     this.issued = issued
-    this.configure = configure
+    this.#configure = hexToU8(configure)
     this.name = name
     this.description = description
     this.renderer = renderer
@@ -32,7 +32,9 @@ class TokenClass {
 
   toString() {
     const dynamic = `${encode(this.name)}${encode(this.description)}${encode(this.renderer)}${encode(this.extinfoData)}`
-    return `0x${u8ToHex(this.version)}${u32ToBe(this.total)}${u32ToBe(this.issued)}${u8ToHex(this.configure)}${dynamic}`
+    return `0x${u8ToHex(this.version)}${u32ToBe(this.total)}${u32ToBe(this.issued)}${u8ToHex(
+      this.#configure,
+    )}${dynamic}`
   }
 
   updateIssued(issued) {
@@ -43,6 +45,19 @@ class TokenClass {
     this.name = name
   }
 
+  getConfigure() {
+    return u8ToHex(this.#configure)
+  }
+
+  updateConfigure(configure: Hex) {
+    this.#configure = hexToU8(configure)
+  }
+
+  static fromProps(props: TokenClassProps): TokenClass {
+    const { version, total, issued, configure, name, description, renderer } = props
+    return new TokenClass(version, total, issued, configure, name, description, renderer)
+  }
+
   static fromString(data: Hex) {
     const temp = remove0x(data)
     if (temp.length < 24) {
@@ -51,7 +66,7 @@ class TokenClass {
     const version = parseInt(temp.slice(0, 2), 16)
     const total = parseInt(temp.slice(2, 10), 16)
     const issued = parseInt(temp.slice(10, 18), 16)
-    const configure = parseInt(temp.slice(18, 20), 16)
+    const configure = `0x${temp.slice(18, 20)}`
 
     const nameLen = parseInt(temp.slice(20, 24), 16) * 2
     const name = temp.slice(24, nameLen + 24)

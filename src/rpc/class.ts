@@ -44,15 +44,15 @@ export const createClassCells = async (issuerTypeArgs: Hex, classCount = 1) => {
   const issuerOutput = issuerCell.output
   let classTypeScripts = []
   let tokenClasses = []
-  const tokenClass = new TokenClass(
-    0,
-    1000,
-    0,
-    0,
-    utf8ToHex('First NFT'),
-    utf8ToHex('Description'),
-    utf8ToHex('https://goldenlegend.oss-cn-hangzhou.aliyuncs.com/production/1620983974245.jpeg'),
-  ).toString()
+  const tokenClass = TokenClass.fromProps({
+    version: 0,
+    total: 1000,
+    issued: 0,
+    configure: '0xc0',
+    name: utf8ToHex('First NFT'),
+    description: utf8ToHex('Description'),
+    renderer: utf8ToHex('https://goldenlegend.oss-cn-hangzhou.aliyuncs.com/production/1620983974245.jpeg'),
+  }).toString()
   const issuerId = remove0x(scriptToHash(issuerType)).slice(0, 40)
   for (let i = 0; i < classCount; i++) {
     classTypeScripts.push({

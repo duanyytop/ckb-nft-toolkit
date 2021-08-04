@@ -43,7 +43,7 @@ export const createIssuerCell = async () => {
   const issuerTypeArgs = generateIssuerTypeArgs(inputs[0], BigInt(0))
   const outputs = await generateIssuerOutputs(capacity, { ...IssuerTypeScript, args: issuerTypeArgs })
   const cellDeps = [await secp256k1Dep(), IssuerTypeDep]
-  const issuer = new Issuer(0, 0, 0, '')
+  const issuer = Issuer.fromProps({ version: 0, classCount: 0, setCount: 0, info: '' })
   const rawTx = {
     version: '0x0',
     cellDeps,

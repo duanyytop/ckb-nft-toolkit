@@ -35,5 +35,40 @@ type UpdateNFTProps = {
   characteristic?: U8[]
   issuerOutPoint?: CKBComponents.OutPoint
   classOutPoint?: CKBComponents.OutPoint
-  state?: U8
+  state?: Hex
+}
+
+type NftIssuerProps = {
+  issuerOutPoint: CKBComponents.OutPoint
+  nftOutPoint: CKBComponents.OutPoint
+}
+
+type NftClassProps = {
+  classOutPoint: CKBComponents.OutPoint
+  nftOutPoint: CKBComponents.OutPoint
+}
+
+type IssuerProps = {
+  version: U8
+  classCount: U32
+  setCount: U32
+  info: DynHex
+}
+
+type TokenClassProps = {
+  version: U8
+  total: U32
+  issued: U32
+  configure: Hex
+  name: DynHex
+  description: DynHex
+  renderer: DynHex
+}
+
+type NftProps = {
+  version: U8
+  characteristic: U8[]
+  configure: Hex
+  state: Hex
+  extinfoData: DynHex
 }
