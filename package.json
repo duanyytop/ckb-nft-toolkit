@@ -6,9 +6,9 @@
   "author": "duanyytop <duanyytop@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start:issuer": "npm run build && node dist/example/issuer.js",
-    "start:class": "npm run build && node dist/example/class.js",
-    "start:nft": "npm run build && node dist/example/nft.js",
+    "start:issuer": "ts-node --files src/example/issuer.ts",
+    "start:class": "ts-node --files src/example/class.ts",
+    "start:nft": "ts-node --files src/example/nft.ts",
     "build": "tsc -p .",
     "lint": "eslint src/**/*.ts --fix"
   },
@@ -20,7 +20,7 @@
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
-    "@types/node": "^16.4.0",
+    "@types/node": "^16.4.13",
     "babel-eslint": "^10.1.0",
     "dotenv": "^8.2.0",
     "eslint": "^7.27.0",
