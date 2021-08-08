@@ -6,9 +6,9 @@
   "author": "duanyytop <duanyytop@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start:issuer": "ts-node --files src/example/issuer.ts",
-    "start:class": "ts-node --files src/example/class.ts",
-    "start:nft": "ts-node --files src/example/nft.ts",
+    "start:issuer": "ts-node src/example/issuer.ts",
+    "start:class": "ts-node src/example/class.ts",
+    "start:nft": "ts-node src/example/nft.ts",
     "build": "tsc -p .",
     "lint": "eslint src/**/*.ts --fix"
   },
