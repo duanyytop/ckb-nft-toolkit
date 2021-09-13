@@ -21,15 +21,6 @@ type IndexerCells = {
   lastCursor: Hex
 }
 
-enum UpdateActions {
-  LOCK,
-  CLAIM,
-  ADD_EXT_INFO,
-  UPDATE_CHARACTERISTIC,
-  UPDATE_STATE_WITH_ISSUER,
-  UPDATE_STATE_WITH_CLASS,
-}
-
 type UpdateNFTProps = {
   extInfo?: DynHex
   characteristic?: U8[]
@@ -63,6 +54,7 @@ type TokenClassProps = {
   name: DynHex
   description: DynHex
   renderer: DynHex
+  extinfoData?: DynHex
 }
 
 type NftProps = {

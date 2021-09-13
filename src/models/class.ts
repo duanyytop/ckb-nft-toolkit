@@ -54,8 +54,8 @@ class TokenClass {
   }
 
   static fromProps(props: TokenClassProps): TokenClass {
-    const { version, total, issued, configure, name, description, renderer } = props
-    return new TokenClass(version, total, issued, configure, name, description, renderer)
+    const { version, total, issued, configure, name, description, renderer, extinfoData = '' } = props
+    return new TokenClass(version, total, issued, configure, name, description, renderer, extinfoData)
   }
 
   static fromString(data: Hex) {

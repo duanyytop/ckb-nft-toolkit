@@ -15,4 +15,13 @@ export const toCamelcase = (object: any) => {
   return null
 }
 
+export enum UpdateActions {
+  LOCK,
+  CLAIM,
+  ADD_EXT_INFO,
+  UPDATE_CHARACTERISTIC,
+  UPDATE_STATE_WITH_ISSUER,
+  UPDATE_STATE_WITH_CLASS,
+}
+
 export default toCamelcase

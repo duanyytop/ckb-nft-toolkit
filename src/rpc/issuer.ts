@@ -1,6 +1,6 @@
 import CKB from '@nervosnetwork/ckb-sdk-core'
 import { serializeInput, blake2b, hexToBytes } from '@nervosnetwork/ckb-sdk-utils'
-import { secp256k1LockScript, secp256k1Dep } from '../account'
+import { secp256k1LockScript, secp256k1Dep, alwaysSuccessLock, alwaysSuccessCellDep } from '../account'
 import { getCells, collectInputs, getLiveCell } from '../collector'
 import { FEE, IssuerTypeScript, IssuerTypeDep } from '../constants/script'
 import { CKB_NODE_RPC, PRIVATE_KEY } from '../utils/config'
@@ -19,8 +19,12 @@ const generateIssuerTypeArgs = (firstInput: CKBComponents.CellInput, firstOutput
   return `0x${s.digest('hex').slice(0, 40)}`
 }
 
-const generateIssuerOutputs = async (inputCapacity: bigint, issuerType: CKBComponents.Script) => {
-  const lock = await secp256k1LockScript()
+const generateIssuerOutputs = async (
+  inputCapacity: bigint,
+  issuerType: CKBComponents.Script,
+  isAlwaysSuccessLock = false,
+) => {
+  const lock = isAlwaysSuccessLock ? alwaysSuccessLock() : await secp256k1LockScript()
   let outputs: CKBComponents.CellOutput[] = [
     {
       capacity: `0x${ISSUER_CELL_CAPACITY.toString(16)}`,
@@ -36,13 +40,17 @@ const generateIssuerOutputs = async (inputCapacity: bigint, issuerType: CKBCompo
   return outputs
 }
 
-export const createIssuerCell = async () => {
-  const lock = await secp256k1LockScript()
+export const createIssuerCell = async (isAlwaysSuccessLock = false) => {
+  const lock = isAlwaysSuccessLock ? alwaysSuccessLock() : await secp256k1LockScript()
   const liveCells = await getCells(lock)
   const { inputs, capacity } = collectInputs(liveCells, ISSUER_CELL_CAPACITY)
   const issuerTypeArgs = generateIssuerTypeArgs(inputs[0], BigInt(0))
-  const outputs = await generateIssuerOutputs(capacity, { ...IssuerTypeScript, args: issuerTypeArgs })
-  const cellDeps = [await secp256k1Dep(), IssuerTypeDep]
+  const outputs = await generateIssuerOutputs(
+    capacity,
+    { ...IssuerTypeScript, args: issuerTypeArgs },
+    isAlwaysSuccessLock,
+  )
+  const cellDeps = [isAlwaysSuccessLock ? alwaysSuccessCellDep() : await secp256k1Dep(), IssuerTypeDep]
   const issuer = Issuer.fromProps({ version: 0, classCount: 0, setCount: 0, info: '' })
   const rawTx = {
     version: '0x0',
@@ -53,10 +61,16 @@ export const createIssuerCell = async () => {
     outputsData: [issuer.toString(), '0x'],
     witnesses: [],
   }
-  rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
-  const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
-  console.info(JSON.stringify(signedTx))
-  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  let txHash = ''
+  if (isAlwaysSuccessLock) {
+    rawTx.witnesses = rawTx.inputs.map(() => '0x')
+    txHash = await ckb.rpc.sendTransaction(rawTx)
+  } else {
+    rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
+    const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
+    console.info(JSON.stringify(signedTx))
+    txHash = await ckb.rpc.sendTransaction(signedTx)
+  }
   console.info(`Creating issuer cell tx has been sent with tx hash ${txHash}`)
   return txHash
 }
@@ -94,7 +108,7 @@ export const destroyIssuerCell = async issuerOutPoint => {
   return txHash
 }
 
-export const updateIssuerCell = async issuerOutPoint => {
+export const updateIssuerCell = async (issuerOutPoint, isAlwaysSuccessLock = false) => {
   const inputs = [
     {
       previousOutput: issuerOutPoint,
@@ -110,7 +124,7 @@ export const updateIssuerCell = async issuerOutPoint => {
   issuer.updateInfo('0x1234')
   let outputsData = [issuer.toString()]
 
-  const cellDeps = [await secp256k1Dep(), IssuerTypeDep]
+  const cellDeps = [isAlwaysSuccessLock ? alwaysSuccessCellDep() : await secp256k1Dep(), IssuerTypeDep]
 
   const rawTx = {
     version: '0x0',
@@ -121,10 +135,15 @@ export const updateIssuerCell = async issuerOutPoint => {
     outputsData,
     witnesses: [],
   }
-  rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
-  const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
-  console.log(JSON.stringify(signedTx))
-  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  let txHash = ''
+  if (isAlwaysSuccessLock) {
+    rawTx.witnesses = rawTx.inputs.map(() => '0x')
+    txHash = await ckb.rpc.sendTransaction(rawTx)
+  } else {
+    rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
+    const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
+    txHash = await ckb.rpc.sendTransaction(signedTx)
+  }
   console.info(`Update issuer cell tx has been sent with tx hash ${txHash}`)
   return txHash
 }

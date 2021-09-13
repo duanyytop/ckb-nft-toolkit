@@ -1,33 +1,33 @@
-export const FEE = BigInt(25000)
+export const FEE = BigInt(10000)
 
 export const IssuerTypeScript: CKBComponents.Script = {
-  codeHash: '0xb59879b6ea6fff985223117fa499ce84f8cfb028c4ffdfdf5d3ec19e905a11ed',
+  codeHash: '0x24bdb240647c7e6ffffcf6e321f68c791e8eeced844f78fa96eac178ee5c630c',
   hashType: 'type',
   args: '',
 }
 export const IssuerTypeDep: CKBComponents.CellDep = {
-  outPoint: { txHash: '0x194a0f84de41d006a07ece07c96a8130100818599fcf0b2ecf49e512b873ed6e', index: '0x0' },
+  outPoint: { txHash: '0x37165393ffbb126143e39074ecf18f5b3cde4786292312fb24a9316583cd92f7', index: '0x0' },
   depType: 'code',
 }
 
 export const ClassTypeScript: CKBComponents.Script = {
-  codeHash: '0x095b8c0b4e51a45f953acd1fcd1e39489f2675b4bc94e7af27bb38958790e3fc',
+  codeHash: '0x1726a9fff88031137139c8280391985377afcf66f78f0b1f76760f8725e0c05a',
   hashType: 'type',
   args: '',
 }
 
 export const ClassTypeDep: CKBComponents.CellDep = {
-  outPoint: { txHash: '0x194a0f84de41d006a07ece07c96a8130100818599fcf0b2ecf49e512b873ed6e', index: '0x1' },
+  outPoint: { txHash: '0x7d43d5fd63c89219457c6d0e9f82a208f0efc567e13f5be05b175cd11a83a6b8', index: '0x0' },
   depType: 'code',
 }
 
 export const NFTTypeScript: CKBComponents.Script = {
-  codeHash: '0xb1837b5ad01a88558731953062d1f5cb547adf89ece01e8934a9f0aeed2d959f',
+  codeHash: '0x8e04b9ad3a7d398f2f32c64c070038edeb740898311595e2e70cac77fe5d8cda',
   hashType: 'type',
   args: '',
 }
 
 export const NFTTypeDep: CKBComponents.CellDep = {
-  outPoint: { txHash: '0x194a0f84de41d006a07ece07c96a8130100818599fcf0b2ecf49e512b873ed6e', index: '0x2' },
+  outPoint: { txHash: '0xd2fdcd331eaf64824b123b21c8cee2d28b0859ca1a41613f15d5a044bc257b45', index: '0x0' },
   depType: 'code',
 }

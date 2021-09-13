@@ -13,17 +13,23 @@ import {
 } from '../rpc/nft'
 
 const run = async () => {
-  await createNftCells('0x767023b5817307973f18a9a4f4a018fc5a03af5300000000', 2)
+  await createNftCells('0xda72621c62aad30c0131f366330bccc9b8bc584900000001', 2)
   // const nftOutPoints = [
   //   {
-  //     txHash: '0x9c09f51bc4f4cc01e7c5a207524c5be1fed59aa2b1e9b96ecf75a8ab1dcf6ae5',
-  //     index: '0x1',
+  //     txHash: '0x532462b201e1712a347dbc366db1fd9dc79eb54719b9127280f4aea74ebccef0',
+  //     index: '0x2',
   //   },
   // ]
-  // await transferNftCells(nftOutPoints)
-  // await destroyNftCell({ txHash: '0xa31620254cadd7a331e1213058dde19bd4fa892d288b5516fb4b55f7d2ba1e68', index: '0x0' })
+  // await transferNftCells(nftOutPoints, true)
+  // await destroyNftCell(
+  //   { txHash: '0xf844937938829a072d369d209fb34c829f7d485c3e452c54d5bc3fe464e2ea12', index: '0x0' },
+  //   true,
+  // )
   // await lockNftCell({ txHash: '0xbac38d5138debec6ddb1def5160da8fff16617f157ede41f13e52cd4d0745ee6', index: '0x1' })
-  // await claimNftCell({ txHash: '0x0bd97d71c9c70f40386b792fdcb0bdbdb507243d0242cd3506212018c143be4f', index: '0x2' })
+  // await claimNftCell(
+  //   { txHash: '0xf844937938829a072d369d209fb34c829f7d485c3e452c54d5bc3fe464e2ea12', index: '0x0' },
+  //   true,
+  // )
   // await addExtInfoToNftCell({
   //   txHash: '0x2f31a3bbd7688a37dbaa637bdcb9a7d89db4492821c885dd5e4ff8fd56e0d7bc',
   //   index: '0x1',

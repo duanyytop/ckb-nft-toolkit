@@ -9,7 +9,7 @@ import Issuer from '../models/issuer'
 import TokenClass from '../models/class'
 
 const ckb = new CKB(CKB_NODE_RPC)
-const CLASS_CELL_CAPACITY = BigInt(240) * BigInt(100000000)
+const CLASS_CELL_CAPACITY = BigInt(320) * BigInt(100000000)
 
 export const generateClassOutputs = async (inputCapacity: bigint, classTypeScripts) => {
   const lock = await secp256k1LockScript()
@@ -48,10 +48,12 @@ export const createClassCells = async (issuerTypeArgs: Hex, classCount = 1) => {
     version: 0,
     total: 1000,
     issued: 0,
-    configure: '0xc0',
+    configure: '0x00',
     name: utf8ToHex('First NFT'),
     description: utf8ToHex('Description'),
     renderer: utf8ToHex('https://goldenlegend.oss-cn-hangzhou.aliyuncs.com/production/1620983974245.jpeg'),
+    extinfoData:
+      '0x7b226964223a22706f222c2268617368223a22307832653637343864633165306433653335623164626133383766346364646338393331323733336234227d',
   }).toString()
   const issuerId = remove0x(scriptToHash(issuerType)).slice(0, 40)
   for (let i = 0; i < classCount; i++) {
@@ -78,6 +80,9 @@ export const createClassCells = async (issuerTypeArgs: Hex, classCount = 1) => {
     witnesses: [],
   }
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
+  rawTx.witnesses.push(
+    '0x7b2274797065223a7b22656e756d223a5b5d7d2c2264617461223a5b7b226e616d65223a22726172697479222c2274797065223a2255496e7438222c22706f736974696f6e223a307d5d7d',
+  )
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
   console.log(JSON.stringify(signedTx))
   const txHash = await ckb.rpc.sendTransaction(signedTx)

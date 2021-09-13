@@ -30,3 +30,17 @@ export const receiverSecp256k1Lock = async (): Promise<CKBComponents.Script> => 
     args: generateLockArgs(RECEIVER_PRIVATE_KEY),
   }
 }
+
+export const alwaysSuccessLock = (): CKBComponents.Script => ({
+  codeHash: '0x1157470ca9de091c21c262bf0754b777f3529e10d2728db8f6b4e04cfc2fbb5f',
+  hashType: 'data',
+  args: '0x',
+})
+
+export const alwaysSuccessCellDep = (): CKBComponents.CellDep => ({
+  outPoint: {
+    txHash: '0x46a7625a76cf7401eff1dfe4f46138be69316518c9771c9f780a428843c6b5b1',
+    index: '0x0',
+  },
+  depType: 'code',
+})
