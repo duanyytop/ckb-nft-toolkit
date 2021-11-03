@@ -69,7 +69,7 @@ export const createIssuerCell = async (isAlwaysSuccessLock = false) => {
     rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
     const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
     console.info(JSON.stringify(signedTx))
-    txHash = await ckb.rpc.sendTransaction(signedTx)
+    txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
   }
   console.info(`Creating issuer cell tx has been sent with tx hash ${txHash}`)
   return txHash
@@ -103,7 +103,7 @@ export const destroyIssuerCell = async issuerOutPoint => {
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
   console.log(JSON.stringify(signedTx))
-  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  const txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
   console.info(`Destroy issuer cell tx has been sent with tx hash ${txHash}`)
   return txHash
 }
@@ -142,7 +142,7 @@ export const updateIssuerCell = async (issuerOutPoint, isAlwaysSuccessLock = fal
   } else {
     rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
     const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
-    txHash = await ckb.rpc.sendTransaction(signedTx)
+    txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
   }
   console.info(`Update issuer cell tx has been sent with tx hash ${txHash}`)
   return txHash

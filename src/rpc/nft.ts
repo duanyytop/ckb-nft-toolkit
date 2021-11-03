@@ -13,6 +13,7 @@ import { u32ToBe } from '../utils/hex'
 import TokenClass from '../models/class'
 import Nft from '../models/nft'
 import { UpdateActions } from '../utils/util'
+import { addressToScript } from '@nervosnetwork/ckb-sdk-utils'
 
 const ckb = new CKB(CKB_NODE_RPC)
 const NFT_CELL_CAPACITY = BigInt(150) * BigInt(100000000)
@@ -87,7 +88,7 @@ export const createNftCells = async (classTypeArgs: Hex, nftCount = 1) => {
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
   console.log(JSON.stringify(signedTx))
-  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  const txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
   console.info(`Creating nft cells tx has been sent with tx hash ${txHash}`)
   return txHash
 }
@@ -100,7 +101,10 @@ export const transferNftCells = async (nftOutPoints: CKBComponents.OutPoint[], i
 
   let outputs = []
   let outputsData = []
-  const receiverLock = isAlwaysSuccessLock ? alwaysSuccessLock() : await receiverSecp256k1Lock()
+  const receiverLock = addressToScript(
+    'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47vv458qtrg26djjlscfsj2hrcxgg7vln6ydls6tu',
+  )
+  // const receiverLock = isAlwaysSuccessLock ? alwaysSuccessLock() : await receiverSecp256k1Lock()
   for await (let outPoint of nftOutPoints) {
     const nftCell = await getLiveCell(outPoint)
     outputs.push({ ...nftCell.output, lock: receiverLock })
@@ -122,7 +126,7 @@ export const transferNftCells = async (nftOutPoints: CKBComponents.OutPoint[], i
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
   console.log(JSON.stringify(signedTx))
-  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  const txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
   console.info(`Transfer nft cells tx has been sent with tx hash ${txHash}`)
   return txHash
 }
@@ -160,7 +164,7 @@ export const destroyNftCell = async (nftOutPoint: CKBComponents.OutPoint, isAlwa
     rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
     const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
     console.info(JSON.stringify(signedTx))
-    txHash = await ckb.rpc.sendTransaction(signedTx)
+    txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
   }
   console.info(`Destroy nft cell tx has been sent with tx hash ${txHash}`)
   return txHash
@@ -205,7 +209,7 @@ export const destroyNftCellWithIssuerLock = async ({ issuerOutPoint, nftOutPoint
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
   console.log(JSON.stringify(signedTx))
-  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  const txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
   console.info(`Destroy nft cell with issuer lock has been sent with tx hash ${txHash}`)
   return txHash
 }
@@ -250,7 +254,7 @@ export const destroyNftCellWithClassLock = async ({ classOutPoint, nftOutPoint }
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
   console.log(JSON.stringify(signedTx))
-  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  const txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
   console.info(`Destroy nft cell with class lock has been sent with tx hash ${txHash}`)
   return txHash
 }
@@ -333,7 +337,7 @@ const updateNftCell = async (
     rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
     const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
     console.info(JSON.stringify(signedTx))
-    txHash = await ckb.rpc.sendTransaction(signedTx)
+    txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
   }
   console.info(`${action.toString()} nft cell tx has been sent with tx hash ${txHash}`)
   return txHash

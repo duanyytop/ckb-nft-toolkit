@@ -9,7 +9,7 @@ import Issuer from '../models/issuer'
 import TokenClass from '../models/class'
 
 const ckb = new CKB(CKB_NODE_RPC)
-const CLASS_CELL_CAPACITY = BigInt(320) * BigInt(100000000)
+const CLASS_CELL_CAPACITY = BigInt(300) * BigInt(100000000)
 
 export const generateClassOutputs = async (inputCapacity: bigint, classTypeScripts) => {
   const lock = await secp256k1LockScript()
@@ -85,7 +85,7 @@ export const createClassCells = async (issuerTypeArgs: Hex, classCount = 1) => {
   )
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
   console.log(JSON.stringify(signedTx))
-  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  const txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
   console.info(`Creating class cells tx has been sent with tx hash ${txHash}`)
   return txHash
 }
@@ -118,7 +118,7 @@ export const destroyClassCell = async classOutPoint => {
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
   console.log(JSON.stringify(signedTx))
-  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  const txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
   console.info(`Destroy class cell tx has been sent with tx hash ${txHash}`)
   return txHash
 }
@@ -153,7 +153,7 @@ export const updateClassCell = async classOutPoint => {
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
   console.log(JSON.stringify(signedTx))
-  const txHash = await ckb.rpc.sendTransaction(signedTx)
+  const txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
   console.info(`Update class cell tx has been sent with tx hash ${txHash}`)
   return txHash
 }
