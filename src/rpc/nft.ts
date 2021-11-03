@@ -2,7 +2,7 @@ import CKB from '@nervosnetwork/ckb-sdk-core'
 import {
   secp256k1LockScript,
   secp256k1Dep,
-  receiverSecp256k1Lock,
+  receiverLockScript,
   alwaysSuccessLock,
   alwaysSuccessCellDep,
 } from '../account'
@@ -13,7 +13,6 @@ import { u32ToBe } from '../utils/hex'
 import TokenClass from '../models/class'
 import Nft from '../models/nft'
 import { UpdateActions } from '../utils/util'
-import { addressToScript } from '@nervosnetwork/ckb-sdk-utils'
 
 const ckb = new CKB(CKB_NODE_RPC)
 const NFT_CELL_CAPACITY = BigInt(150) * BigInt(100000000)
@@ -101,10 +100,7 @@ export const transferNftCells = async (nftOutPoints: CKBComponents.OutPoint[], i
 
   let outputs = []
   let outputsData = []
-  const receiverLock = addressToScript(
-    'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47vv458qtrg26djjlscfsj2hrcxgg7vln6ydls6tu',
-  )
-  // const receiverLock = isAlwaysSuccessLock ? alwaysSuccessLock() : await receiverSecp256k1Lock()
+  const receiverLock = isAlwaysSuccessLock ? alwaysSuccessLock() : receiverLockScript()
   for await (let outPoint of nftOutPoints) {
     const nftCell = await getLiveCell(outPoint)
     outputs.push({ ...nftCell.output, lock: receiverLock })

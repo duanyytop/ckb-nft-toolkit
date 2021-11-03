@@ -13,14 +13,14 @@ import {
 } from '../rpc/nft'
 
 const run = async () => {
-  await createNftCells('0x3939ecec56db8161b6308c84d6f5f9f12d00d1f000000001', 10)
-  // const nftOutPoints = [
-  //   {
-  //     txHash: '0x96ea6c915885e47004e1e4692f4d221ec606f25a77e50b7cd68320ada7dcb506',
-  //     index: '0x2',
-  //   },
-  // ]
-  // await transferNftCells(nftOutPoints)
+  // await createNftCells('0x3939ecec56db8161b6308c84d6f5f9f12d00d1f000000001', 10)
+  const nftOutPoints = [
+    {
+      txHash: '0x39d2ba8d98840731b0b7ab03aa8db5a68588d38a805f127e069744602f0da253',
+      index: '0x1',
+    },
+  ]
+  await transferNftCells(nftOutPoints)
   // await destroyNftCell(
   //   { txHash: '0xf844937938829a072d369d209fb34c829f7d485c3e452c54d5bc3fe464e2ea12', index: '0x0' },
   //   true,
