@@ -45,15 +45,13 @@ export const createClassCells = async (issuerTypeArgs: Hex, classCount = 1) => {
   let classTypeScripts = []
   let tokenClasses = []
   const tokenClass = TokenClass.fromProps({
-    version: 0,
+    version: 1,
     total: 1000,
     issued: 0,
     configure: '0x00',
     name: utf8ToHex('First NFT'),
     description: utf8ToHex('Description'),
     renderer: utf8ToHex('https://goldenlegend.oss-cn-hangzhou.aliyuncs.com/production/1620983974245.jpeg'),
-    extinfoData:
-      '0x7b226964223a22706f222c2268617368223a22307832653637343864633165306433653335623164626133383766346364646338393331323733336234227d',
   }).toString()
   const issuerId = remove0x(scriptToHash(issuerType)).slice(0, 40)
   for (let i = 0; i < classCount; i++) {
@@ -80,9 +78,6 @@ export const createClassCells = async (issuerTypeArgs: Hex, classCount = 1) => {
     witnesses: [],
   }
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
-  rawTx.witnesses.push(
-    '0x7b2274797065223a7b22656e756d223a5b5d7d2c2264617461223a5b7b226e616d65223a22726172697479222c2274797065223a2255496e7438222c22706f736974696f6e223a307d5d7d',
-  )
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
   console.log(JSON.stringify(signedTx))
   const txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
@@ -151,6 +146,45 @@ export const updateClassCell = async classOutPoint => {
     witnesses: [],
   }
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
+  const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
+  console.log(JSON.stringify(signedTx))
+  const txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
+  console.info(`Update class cell tx has been sent with tx hash ${txHash}`)
+  return txHash
+}
+
+export const updateClassCellToMintCompactNFT = async classOutPoint => {
+  const inputs = [
+    {
+      previousOutput: classOutPoint,
+      since: '0x0',
+    },
+  ]
+
+  const classCell = await getLiveCell(classOutPoint)
+  const outputs = [classCell.output]
+  outputs[0].capacity = `0x${(BigInt(outputs[0].capacity) - FEE).toString(16)}`
+
+  let tokenClass = TokenClass.fromString(classCell.data.content)
+  tokenClass.addSmtRootHash('00ad58e4d1a5798a3260197003dfc19f74fd724b9a80cd454e62ba9bccf4d1c7')
+  tokenClass.updateIssued(2)
+  let outputsData = [tokenClass.toString()]
+
+  const cellDeps = [await secp256k1Dep(), ClassTypeDep]
+
+  const witnessData =
+    '0x2b010000100000004c0000001e010000020000003939ecec56db8161b6308c84d6f5f9f12d00d1f000000002000000003939ecec56db8161b6308c84d6f5f9f12d00d1f00000000200000001d20000000c0000006f000000630000000c000000160000000505050505050505000049000000490000001000000030000000310000009bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce801140000000861e2b008ec0f2b1e6856fb8a24198222e02f19630000000c000000160000000505050505050505000049000000490000001000000030000000310000009bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce80114000000dc70f33de86fdf381b4fc5bf092bb23d02774801090000004c4ff84c4ff8484f07'
+
+  const rawTx = {
+    version: '0x0',
+    cellDeps,
+    headerDeps: [],
+    inputs,
+    outputs,
+    outputsData,
+    witnesses: [],
+  }
+  rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: witnessData, outputType: '' }))
   const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
   console.log(JSON.stringify(signedTx))
   const txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')

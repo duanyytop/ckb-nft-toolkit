@@ -8,7 +8,7 @@ class TokenClass {
   name: DynHex = ''
   description: DynHex = ''
   renderer: DynHex = ''
-  extinfoData: DynHex = ''
+  smtRootHash: Hex = ''
 
   constructor(
     version = 0,
@@ -18,7 +18,7 @@ class TokenClass {
     name: DynHex,
     description: DynHex,
     renderer: DynHex,
-    extinfoData = '',
+    smtRootHash?: Hex
   ) {
     this.version = version
     this.total = total
@@ -27,11 +27,11 @@ class TokenClass {
     this.name = name
     this.description = description
     this.renderer = renderer
-    this.extinfoData = extinfoData
+    this.smtRootHash = smtRootHash
   }
 
   toString() {
-    const dynamic = `${encode(this.name)}${encode(this.description)}${encode(this.renderer)}${encode(this.extinfoData)}`
+    const dynamic = `${encode(this.name)}${encode(this.description)}${encode(this.renderer)}${remove0x(this.smtRootHash)}`
     return `0x${u8ToHex(this.version)}${u32ToBe(this.total)}${u32ToBe(this.issued)}${u8ToHex(
       this.#configure,
     )}${dynamic}`
@@ -53,9 +53,13 @@ class TokenClass {
     this.#configure = hexToU8(configure)
   }
 
+  addSmtRootHash(smtRootHash: Hex) {
+    this.smtRootHash = smtRootHash
+  }
+
   static fromProps(props: TokenClassProps): TokenClass {
-    const { version, total, issued, configure, name, description, renderer, extinfoData = '' } = props
-    return new TokenClass(version, total, issued, configure, name, description, renderer, extinfoData)
+    const { version, total, issued, configure, name, description, renderer, smtRootHash = '' } = props
+    return new TokenClass(version, total, issued, configure, name, description, renderer, smtRootHash)
   }
 
   static fromString(data: Hex) {
@@ -84,6 +88,11 @@ class TokenClass {
 
     const rendererLen = parseInt(temp.slice(descriptionLen + nameLen + 28, descriptionLen + nameLen + 32), 16) * 2
     const renderer = temp.slice(descriptionLen + nameLen + 32, descriptionLen + nameLen + rendererLen + 32)
+
+    if (temp.length > descriptionLen + nameLen + rendererLen + 32) {
+      const smtRootHash = temp.slice(descriptionLen + nameLen + rendererLen + 32)
+      return new TokenClass(version, total, issued, configure, name, description, renderer, smtRootHash)
+    }
 
     return new TokenClass(version, total, issued, configure, name, description, renderer)
   }

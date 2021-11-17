@@ -54,7 +54,7 @@ type TokenClassProps = {
   name: DynHex
   description: DynHex
   renderer: DynHex
-  extinfoData?: DynHex
+  smtRootHash?: Hex
 }
 
 type NftProps = {
