@@ -31,12 +31,12 @@ type UpdateNFTProps = {
 
 type NftIssuerProps = {
   issuerOutPoint: CKBComponents.OutPoint
-  nftOutPoint: CKBComponents.OutPoint
+  nftOutPoints: CKBComponents.OutPoint[]
 }
 
 type NftClassProps = {
   classOutPoint: CKBComponents.OutPoint
-  nftOutPoint: CKBComponents.OutPoint
+  nftOutPoints: CKBComponents.OutPoint[]
 }
 
 type IssuerProps = {

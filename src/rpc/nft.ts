@@ -92,7 +92,7 @@ export const createNftCells = async (classTypeArgs: Hex, nftCount = 1) => {
   return txHash
 }
 
-export const transferNftCells = async (nftOutPoints: CKBComponents.OutPoint[], isAlwaysSuccessLock = false) => {
+export const transferNftCells = async (nftOutPoints: CKBComponents.OutPoint[]) => {
   const inputs = nftOutPoints.map(outPoint => ({
     previousOutput: outPoint,
     since: '0x0',
@@ -100,7 +100,7 @@ export const transferNftCells = async (nftOutPoints: CKBComponents.OutPoint[], i
 
   let outputs = []
   let outputsData = []
-  const receiverLock = isAlwaysSuccessLock ? alwaysSuccessLock() : receiverLockScript()
+  const receiverLock = receiverLockScript()
   for await (let outPoint of nftOutPoints) {
     const nftCell = await getLiveCell(outPoint)
     outputs.push({ ...nftCell.output, lock: receiverLock })
@@ -127,21 +127,23 @@ export const transferNftCells = async (nftOutPoints: CKBComponents.OutPoint[], i
   return txHash
 }
 
-export const destroyNftCell = async (nftOutPoint: CKBComponents.OutPoint, isAlwaysSuccessLock = false) => {
-  const inputs = [
-    {
-      previousOutput: nftOutPoint,
-      since: '0x0',
-    },
-  ]
-  const nftCell = await getLiveCell(nftOutPoint)
-  const output = nftCell.output
-  output.capacity = `0x${(BigInt(output.capacity) - FEE).toString(16)}`
-  output.type = null
-  const outputs = [output]
-  const outputsData = ['0x']
+export const destroyNftCells = async (nftOutPoints: CKBComponents.OutPoint[]) => {
+  const inputs = nftOutPoints.map(outPoint => ({
+    previousOutput: outPoint,
+    since: '0x0',
+  }))
+  let outputs = []
+  nftOutPoints.forEach(async nftOutPoint => {
+    const nftCell = await getLiveCell(nftOutPoint)
+    let output: CKBComponents.CellOutput = nftCell.output
+    output.capacity = `0x${(BigInt(output.capacity) - FEE).toString(16)}`
+    output.type = null
+    outputs.push(output)
+  })
+  
+  const outputsData = nftOutPoints.map(_ => "0x")
 
-  const cellDeps = [isAlwaysSuccessLock ? alwaysSuccessCellDep() : await secp256k1Dep(), NFTTypeDep]
+  const cellDeps = [await secp256k1Dep(), NFTTypeDep]
 
   const rawTx = {
     version: '0x0',
@@ -152,32 +154,27 @@ export const destroyNftCell = async (nftOutPoint: CKBComponents.OutPoint, isAlwa
     outputsData,
     witnesses: [],
   }
-  let txHash = ''
-  if (isAlwaysSuccessLock) {
-    rawTx.witnesses = rawTx.inputs.map(() => '0x')
-    txHash = await ckb.rpc.sendTransaction(rawTx)
-  } else {
-    rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
-    const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
-    console.info(JSON.stringify(signedTx))
-    txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
-  }
+  rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
+  const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
+  console.info(JSON.stringify(signedTx))
+  const txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
   console.info(`Destroy nft cell tx has been sent with tx hash ${txHash}`)
   return txHash
 }
 
-export const destroyNftCellWithIssuerLock = async ({ issuerOutPoint, nftOutPoint }: NftIssuerProps) => {
+export const destroyNftCellsWithIssuerLock = async ({ issuerOutPoint, nftOutPoints }: NftIssuerProps) => {
   const lock = await secp256k1LockScript()
   const liveCells = await getCells(lock)
   const { inputs: normalCells } = collectInputs(liveCells, NORMAL_CELL_CAPACITY)
 
-  const inputs = [
-    normalCells[0],
-    {
+  let inputs = [normalCells[0]]
+  nftOutPoints.forEach(nftOutPoint => {
+    inputs.push({
       previousOutput: nftOutPoint,
       since: '0x0',
-    },
-  ]
+    })
+  })
+
   const issuerCellDep: CKBComponents.CellDep = { outPoint: issuerOutPoint, depType: 'code' }
 
   let outputs = []
@@ -185,11 +182,15 @@ export const destroyNftCellWithIssuerLock = async ({ issuerOutPoint, nftOutPoint
   outputs.push(issuerNormalCell.output)
   outputs[0].capacity = `0x${(BigInt(outputs[0].capacity) - FEE).toString(16)}`
 
-  const nftCell = await getLiveCell(nftOutPoint)
-  outputs.push(nftCell.output)
-  outputs[1].type = null
+  let outputsData = ['0x']
 
-  const outputsData = ['0x', '0x']
+  nftOutPoints.forEach(async nftOutPoint => {
+    const nftCell = await getLiveCell(nftOutPoint)
+    let output = nftCell.output
+    output.type = null
+    outputs.push(output)
+    outputsData.push('0x')
+  })
 
   const cellDeps = [issuerCellDep, await secp256k1Dep(), NFTTypeDep, IssuerTypeDep]
 
@@ -210,18 +211,18 @@ export const destroyNftCellWithIssuerLock = async ({ issuerOutPoint, nftOutPoint
   return txHash
 }
 
-export const destroyNftCellWithClassLock = async ({ classOutPoint, nftOutPoint }: NftClassProps) => {
+export const destroyNftCellsWithClassLock = async ({ classOutPoint, nftOutPoints }: NftClassProps) => {
   const lock = await secp256k1LockScript()
   const liveCells = await getCells(lock)
   const { inputs: normalCells } = collectInputs(liveCells, NORMAL_CELL_CAPACITY)
 
-  const inputs = [
-    normalCells[0],
-    {
+  let inputs = [normalCells[0]]
+  nftOutPoints.forEach(nftOutPoint => {
+    inputs.push({
       previousOutput: nftOutPoint,
       since: '0x0',
-    },
-  ]
+    })
+  })
 
   const classCellDep: CKBComponents.CellDep = { outPoint: classOutPoint, depType: 'code' }
 
@@ -230,11 +231,15 @@ export const destroyNftCellWithClassLock = async ({ classOutPoint, nftOutPoint }
   outputs.push(classCell.output)
   outputs[0].capacity = `0x${(BigInt(outputs[0].capacity) - FEE).toString(16)}`
 
-  const nftCell = await getLiveCell(nftOutPoint)
-  outputs.push(nftCell.output)
-  outputs[1].type = null
+  let outputsData = ['0x']
 
-  let outputsData = ['0x', '0x']
+  nftOutPoints.forEach(async nftOutPoint => {
+    const nftCell = await getLiveCell(nftOutPoint)
+    let output = nftCell.output
+    output.type = null
+    outputs.push(output)
+    outputsData.push('0x')
+  })
 
   const cellDeps = [classCellDep, await secp256k1Dep(), NFTTypeDep, ClassTypeDep]
 
@@ -255,11 +260,10 @@ export const destroyNftCellWithClassLock = async ({ classOutPoint, nftOutPoint }
   return txHash
 }
 
-const updateNftCell = async (
-  nftOutPoint: CKBComponents.OutPoint,
+const updateNftCells = async (
+  nftOutPoints: CKBComponents.OutPoint[],
   action: UpdateActions,
   props?: UpdateNFTProps,
-  isAlwaysSuccessLock = false,
 ) => {
   let inputs = []
   let outputs = []
@@ -276,37 +280,38 @@ const updateNftCell = async (
     outputsData.push('0x')
   }
 
-  inputs.push({
-    previousOutput: nftOutPoint,
-    since: '0x0',
+  nftOutPoints.forEach(async nftOutPoint => {
+    inputs.push({
+      previousOutput: nftOutPoint,
+      since: '0x0',
+    })
+    const nftCell = await getLiveCell(nftOutPoint)
+    outputs.push(nftCell.output)
+    outputs[0].capacity = `0x${(BigInt(outputs[0].capacity) - FEE).toString(16)}`
+
+    let nft = Nft.fromString(nftCell.data.content)
+    switch (action) {
+      case UpdateActions.LOCK:
+        nft.lock()
+        break
+      case UpdateActions.CLAIM:
+        nft.claim()
+        break
+      case UpdateActions.ADD_EXT_INFO:
+        nft.addExtInfo(props?.extInfo)
+        break
+      case UpdateActions.UPDATE_CHARACTERISTIC:
+        nft.updateCharacteristic(props?.characteristic)
+        break
+      case UpdateActions.UPDATE_STATE_WITH_ISSUER:
+      case UpdateActions.UPDATE_STATE_WITH_CLASS:
+        nft.updateState(props?.state)
+        break
+      default:
+        break
+    }
+    outputsData.push(nft.toString())
   })
-
-  const nftCell = await getLiveCell(nftOutPoint)
-  outputs.push(nftCell.output)
-  outputs[0].capacity = `0x${(BigInt(outputs[0].capacity) - FEE).toString(16)}`
-
-  let nft = Nft.fromString(nftCell.data.content)
-  switch (action) {
-    case UpdateActions.LOCK:
-      nft.lock()
-      break
-    case UpdateActions.CLAIM:
-      nft.claim()
-      break
-    case UpdateActions.ADD_EXT_INFO:
-      nft.addExtInfo(props?.extInfo)
-      break
-    case UpdateActions.UPDATE_CHARACTERISTIC:
-      nft.updateCharacteristic(props?.characteristic)
-      break
-    case UpdateActions.UPDATE_STATE_WITH_ISSUER:
-    case UpdateActions.UPDATE_STATE_WITH_CLASS:
-      nft.updateState(props?.state)
-      break
-    default:
-      break
-  }
-  outputsData.push(nft.toString())
 
   let cellDeps = []
   if (action == UpdateActions.UPDATE_STATE_WITH_ISSUER) {
@@ -314,7 +319,7 @@ const updateNftCell = async (
   } else if (action == UpdateActions.UPDATE_STATE_WITH_CLASS) {
     cellDeps.push({ outPoint: props?.classOutPoint, depType: 'code' })
   }
-  cellDeps = cellDeps.concat([isAlwaysSuccessLock ? alwaysSuccessCellDep() : await secp256k1Dep(), NFTTypeDep])
+  cellDeps = cellDeps.concat([await secp256k1Dep(), NFTTypeDep])
 
   const rawTx = {
     version: '0x0',
@@ -325,41 +330,35 @@ const updateNftCell = async (
     outputsData,
     witnesses: [],
   }
-  let txHash = ''
-  if (isAlwaysSuccessLock) {
-    rawTx.witnesses = rawTx.inputs.map(() => '0x')
-    txHash = await ckb.rpc.sendTransaction(rawTx)
-  } else {
-    rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
-    const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
-    console.info(JSON.stringify(signedTx))
-    txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
-  }
+  rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
+  const signedTx = ckb.signTransaction(PRIVATE_KEY)(rawTx)
+  console.info(JSON.stringify(signedTx))
+  const txHash = await ckb.rpc.sendTransaction(signedTx, 'passthrough')
   console.info(`${action.toString()} nft cell tx has been sent with tx hash ${txHash}`)
   return txHash
 }
 
-export const lockNftCell = async nftOutPoint => await updateNftCell(nftOutPoint, UpdateActions.LOCK)
+export const lockNftCells = async nftOutPoints => await updateNftCells(nftOutPoints, UpdateActions.LOCK)
 
-export const claimNftCell = async (nftOutPoint, isAlwaysSuccessLock = false) =>
-  await updateNftCell(nftOutPoint, UpdateActions.CLAIM, null, isAlwaysSuccessLock)
+export const claimNftCells = async (nftOutPoints) =>
+  await updateNftCells(nftOutPoints, UpdateActions.CLAIM, null)
 
-export const addExtInfoToNftCell = async nftOutPoint => {
+export const addExtInfoToNftCells = async nftOutPoints => {
   const extInfo = '0x5678'
-  return await updateNftCell(nftOutPoint, UpdateActions.ADD_EXT_INFO, { extInfo })
+  return await updateNftCells(nftOutPoints, UpdateActions.ADD_EXT_INFO, { extInfo })
 }
 
-export const updateNftCharacteristic = async nftOutPoint => {
+export const updateNftCharacteristic = async nftOutPoints => {
   const characteristic = [1, 2, 3, 4, 5, 6, 7, 8]
-  return await updateNftCell(nftOutPoint, UpdateActions.UPDATE_CHARACTERISTIC, { characteristic })
+  return await updateNftCells(nftOutPoints, UpdateActions.UPDATE_CHARACTERISTIC, { characteristic })
 }
 
-export const updateNftStateWithIssuer = async ({ nftOutPoint, issuerOutPoint }: NftIssuerProps) => {
+export const updateNftStateWithIssuer = async ({ nftOutPoints, issuerOutPoint }: NftIssuerProps) => {
   const state = '0x00'
-  return await updateNftCell(nftOutPoint, UpdateActions.UPDATE_STATE_WITH_ISSUER, { state, issuerOutPoint })
+  return await updateNftCells(nftOutPoints, UpdateActions.UPDATE_STATE_WITH_ISSUER, { state, issuerOutPoint })
 }
 
-export const updateNftStateWithClass = async ({ nftOutPoint, classOutPoint }: NftClassProps) => {
+export const updateNftStateWithClass = async ({ nftOutPoints, classOutPoint }: NftClassProps) => {
   const state = '0x00'
-  return await updateNftCell(nftOutPoint, UpdateActions.UPDATE_STATE_WITH_CLASS, { state, classOutPoint })
+  return await updateNftCells(nftOutPoints, UpdateActions.UPDATE_STATE_WITH_CLASS, { state, classOutPoint })
 }

@@ -6,7 +6,7 @@ export const IssuerTypeScript: CKBComponents.Script = {
   args: '',
 }
 export const IssuerTypeDep: CKBComponents.CellDep = {
-  outPoint: { txHash: '0x3ecf42927509645dec38667d557dd9ba20d0d07267d769983495c1b6b9c70cc4', index: '0x0' },
+  outPoint: { txHash: '0xf11ccb6079c1a4b3d86abe2c574c5db8d2fd3505fdc1d5970b69b31864a4bd1c', index: '0x0' },
   depType: 'code',
 }
 
@@ -17,7 +17,7 @@ export const ClassTypeScript: CKBComponents.Script = {
 }
 
 export const ClassTypeDep: CKBComponents.CellDep = {
-  outPoint: { txHash: '0x3ecf42927509645dec38667d557dd9ba20d0d07267d769983495c1b6b9c70cc4', index: '0x1' },
+  outPoint: { txHash: '0xf11ccb6079c1a4b3d86abe2c574c5db8d2fd3505fdc1d5970b69b31864a4bd1c', index: '0x1' },
   depType: 'code',
 }
 
@@ -28,6 +28,6 @@ export const NFTTypeScript: CKBComponents.Script = {
 }
 
 export const NFTTypeDep: CKBComponents.CellDep = {
-  outPoint: { txHash: '0x3ecf42927509645dec38667d557dd9ba20d0d07267d769983495c1b6b9c70cc4', index: '0x2' },
+  outPoint: { txHash: '0xf11ccb6079c1a4b3d86abe2c574c5db8d2fd3505fdc1d5970b69b31864a4bd1c', index: '0x2' },
   depType: 'code',
 }
