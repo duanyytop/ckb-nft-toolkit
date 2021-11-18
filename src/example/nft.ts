@@ -21,10 +21,10 @@ const run = async () => {
   //   },
   // ]
   // await transferNftCells(nftOutPoints)
-  await destroyNftCells(
-    [{ txHash: '0x58d8ea339a0e7e36af7a8e328298ad085298961898d6ed0e5df95362ae370f77', index: '0x0' },
-    { txHash: '0x58d8ea339a0e7e36af7a8e328298ad085298961898d6ed0e5df95362ae370f77', index: '0x1' }]
-  )
+  await destroyNftCells([
+    { txHash: '0x58d8ea339a0e7e36af7a8e328298ad085298961898d6ed0e5df95362ae370f77', index: '0x0' },
+    { txHash: '0x58d8ea339a0e7e36af7a8e328298ad085298961898d6ed0e5df95362ae370f77', index: '0x1' },
+  ])
   // await lockNftCell({ txHash: '0xbac38d5138debec6ddb1def5160da8fff16617f157ede41f13e52cd4d0745ee6', index: '0x1' })
   // await claimNftCell(
   //   { txHash: '0xf844937938829a072d369d209fb34c829f7d485c3e452c54d5bc3fe464e2ea12', index: '0x0' },

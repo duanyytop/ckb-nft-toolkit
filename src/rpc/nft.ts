@@ -140,8 +140,8 @@ export const destroyNftCells = async (nftOutPoints: CKBComponents.OutPoint[]) =>
     output.type = null
     outputs.push(output)
   })
-  
-  const outputsData = nftOutPoints.map(_ => "0x")
+
+  const outputsData = nftOutPoints.map(_ => '0x')
 
   const cellDeps = [await secp256k1Dep(), NFTTypeDep]
 
@@ -340,8 +340,7 @@ const updateNftCells = async (
 
 export const lockNftCells = async nftOutPoints => await updateNftCells(nftOutPoints, UpdateActions.LOCK)
 
-export const claimNftCells = async (nftOutPoints) =>
-  await updateNftCells(nftOutPoints, UpdateActions.CLAIM, null)
+export const claimNftCells = async nftOutPoints => await updateNftCells(nftOutPoints, UpdateActions.CLAIM, null)
 
 export const addExtInfoToNftCells = async nftOutPoints => {
   const extInfo = '0x5678'
