@@ -17,7 +17,7 @@ export const ClassTypeScript: CKBComponents.Script = {
 }
 
 export const ClassTypeDep: CKBComponents.CellDep = {
-  outPoint: { txHash: '0xb4c14c234c2fd387cd826fe86c59e9726ec31d13a46021d9cd048f9a2babe295', index: '0x0' },
+  outPoint: { txHash: '0xa6fbf7e36aebf3169a39a8a8bc2462185baa6f6c0300e45cea2b0839ba540e18', index: '0x0' },
   depType: 'depGroup',
 }
 

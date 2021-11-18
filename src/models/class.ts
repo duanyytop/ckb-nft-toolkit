@@ -18,7 +18,7 @@ class TokenClass {
     name: DynHex,
     description: DynHex,
     renderer: DynHex,
-    smtRootHash?: Hex
+    smtRootHash?: Hex,
   ) {
     this.version = version
     this.total = total
@@ -31,7 +31,9 @@ class TokenClass {
   }
 
   toString() {
-    const dynamic = `${encode(this.name)}${encode(this.description)}${encode(this.renderer)}${remove0x(this.smtRootHash)}`
+    const dynamic = `${encode(this.name)}${encode(this.description)}${encode(this.renderer)}${remove0x(
+      this.smtRootHash,
+    )}`
     return `0x${u8ToHex(this.version)}${u32ToBe(this.total)}${u32ToBe(this.issued)}${u8ToHex(
       this.#configure,
     )}${dynamic}`
